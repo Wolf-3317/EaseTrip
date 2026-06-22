@@ -1,0 +1,98 @@
+extends ../layouts/main
+
+block content
+  .container
+    .dashboard
+      aside.dashboard-sidebar
+        nav
+          a.sidebar-nav-item(href="/admin/dashboard")
+            i.fas.fa-tachometer-alt
+            span Dashboard
+          a.sidebar-nav-item(href="/admin/users")
+            i.fas.fa-users
+            span Users
+          a.sidebar-nav-item(href="/admin/listings")
+            i.fas.fa-home
+            span Listings
+          a.sidebar-nav-item.active(href="/admin/reports")
+            i.fas.fa-flag
+            span Reports
+          a.sidebar-nav-item(href="/admin/weather")
+            i.fas.fa-cloud-sun
+            span Weather
+      
+      main.dashboard-main
+        .dashboard-header
+          h1.dashboard-title Reports
+          p.dashboard-subtitle Review reported content and users
+        
+        //- Filter Tabs
+        - var status = (typeof filters !== 'undefined' && filters) ? filters.status : null
+        .flex.gap-2.mb-6
+          a.btn(href="/admin/reports" class=!status ? 'btn-primary' : 'btn-secondary') All
+          a.btn(href="/admin/reports?status=pending" class=status === 'pending' ? 'btn-primary' : 'btn-secondary') Pending
+          a.btn(href="/admin/reports?status=reviewed" class=status === 'reviewed' ? 'btn-primary' : 'btn-secondary') Reviewed
+          a.btn(href="/admin/reports?status=resolved" class=status === 'resolved' ? 'btn-primary' : 'btn-secondary') Resolved
+        
+        //- Reports Table
+        .dashboard-card
+          .dashboard-card-body
+            if reports && reports.length > 0
+              .table-responsive
+                table.table
+                  thead
+                    tr
+                      th Type
+                      th Reporter
+                      th Reason
+                      th Status
+                      th Date
+                      th Actions
+                  tbody
+                    each report in reports
+                      tr
+                        td
+                          span.badge(class=report.type === 'user' ? 'badge-error' : report.type === 'listing' ? 'badge-warning' : 'badge-info')= report.type
+                        td= report.reporter_name || 'Unknown'
+                        td= report.reason
+                        td
+                          span.badge(class=`badge-${report.status === 'pending' ? 'warning' : report.status === 'resolved' ? 'success' : 'gray'}`)= report.status
+                        td= new Date(report.created_at).toLocaleDateString('en-MY')
+                        td
+                          .flex.gap-2
+                            if report.type === 'listing' && report.reported_listing_id
+                              a.btn.btn-sm.btn-outline(
+                                href=`/listings/${report.reported_listing_id}`
+                                title="View Reported Listing"
+                                style="min-width:36px;"
+                              )
+                                i.fas.fa-eye
+                            else if report.type === 'review' && report.review_listing_id
+                              a.btn.btn-sm.btn-outline(
+                                href=`/listings/${report.review_listing_id}`
+                                title="View Review Listing"
+                                style="min-width:36px;"
+                              )
+                                i.fas.fa-eye
+                            if report.status === 'pending'
+                              form(action=`/admin/reports/${report.id}/update` method="POST" style="display: inline;")
+                                input(type="hidden" name="status" value="reviewed")
+                                button.btn.btn-sm.btn-secondary(type="submit" title="Mark Reviewed")
+                                  i.fas.fa-clock
+
+                              form(action=`/admin/reports/${report.id}/update` method="POST" style="display: inline;")
+                                input(type="hidden" name="status" value="resolved")
+                                button.btn.btn-sm.btn-primary(type="submit" title="Resolve")
+                                  i.fas.fa-check
+
+                              form(action=`/admin/reports/${report.id}/update` method="POST" style="display: inline;")
+                                input(type="hidden" name="status" value="dismissed")
+                                button.btn.btn-sm.btn-outline(type="submit" style="color: var(--gray-500);" title="Dismiss")
+                                  i.fas.fa-times
+
+            else
+              .empty-state
+                .empty-state-icon
+                  i.fas.fa-flag
+                h3.empty-state-title No reports
+                p.empty-state-text No reports to review at this time

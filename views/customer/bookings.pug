@@ -1,0 +1,119 @@
+extends ../layouts/main
+
+block content
+  .container
+    .dashboard
+      aside.dashboard-sidebar
+        nav
+          a.sidebar-nav-item(href="/customer/dashboard")
+            i.fas.fa-th-large
+            span Dashboard
+          a.sidebar-nav-item(href="/customer/trips")
+            i.fas.fa-suitcase
+            span My Trips
+          a.sidebar-nav-item.active(href="/customer/bookings")
+            i.fas.fa-calendar-check
+            span Bookings
+          a.sidebar-nav-item(href="/customer/favorites")
+            i.fas.fa-heart
+            span Favorites
+          a.sidebar-nav-item(href="/customer/reviews")
+            i.fas.fa-star
+            span My Reviews
+          a.sidebar-nav-item(href="/customer/inbox")
+            i.fas.fa-envelope
+            span Inbox
+          a.sidebar-nav-item(href="/profile")
+            i.fas.fa-user-circle
+            span Profile
+      
+      main.dashboard-main
+        .dashboard-header
+          h1.dashboard-title My Bookings
+          p.dashboard-subtitle Manage all your bookings
+        
+        //- Filter Tabs
+        .flex.gap-2.mb-6
+          a.btn(href="/customer/bookings" class=!filter ? 'btn-primary' : 'btn-secondary') All
+          a.btn(href="/customer/bookings?status=pending" class=filter === 'pending' ? 'btn-primary' : 'btn-secondary') Pending
+          a.btn(href="/customer/bookings?status=confirmed" class=filter === 'confirmed' ? 'btn-primary' : 'btn-secondary') Confirmed
+          a.btn(href="/customer/bookings?status=cancelled" class=filter === 'cancelled' ? 'btn-primary' : 'btn-secondary') Cancelled
+        
+        //- Bookings List
+        .dashboard-card
+          .dashboard-card-body
+            if bookings && bookings.length > 0
+              .table-responsive
+                table.table
+                  thead
+                    tr
+                      th Property
+                      th Check-in
+                      th Check-out
+                      th Total
+                      th Status
+                      th Actions
+                  tbody
+                    each booking in bookings
+                      tr
+                        td
+                          .flex.items-center.gap-3
+                            img(src=booking.listing_image || 'https://via.placeholder.com/60' style="width: 60px; height: 45px; object-fit: cover; border-radius: var(--radius-md);")
+                            div
+                              p(style="font-weight: 600;")= booking.listing_title
+                              p(style="font-size: 0.75rem; color: var(--gray-500);")= booking.listing_city
+                        td= new Date(booking.check_in).toLocaleDateString('en-MY')
+                        td= new Date(booking.check_out).toLocaleDateString('en-MY')
+                        td(style="font-weight: 600;") RM #{booking.total_price}
+                        td
+                          span.badge(class=`badge-${booking.status === 'confirmed' ? 'success' : booking.status === 'pending' ? 'warning' : booking.status === 'cancelled' ? 'error' : 'gray'}`)= booking.status
+                        td
+                          .flex.gap-2.flex-wrap
+                            a.btn.btn-sm.btn-secondary(href=`/listings/${booking.listing_id}`) View
+                            if booking.status === 'confirmed' && !booking.has_review
+                              a.btn.btn-sm.btn-info(href=`/customer/inbox/booking/${booking.id}`)
+                                i.fas.fa-comment
+                                span Message Host
+                              a.btn.btn-sm.btn-primary(href=`/customer/review/${booking.id}`)
+                                i.fas.fa-star
+                                span Review
+                            else if booking.status === 'confirmed' && booking.has_review
+                              span.badge.badge-success
+                                i.fas.fa-check
+                                |  Reviewed
+                            if booking.status === 'pending'
+                              button.btn.btn-sm.btn-outline(type="button" onclick=`showCancelModal(${booking.id})` style="color: var(--error); border-color: var(--error);") Cancel
+            else
+              .empty-state
+                .empty-state-icon
+                  i.fas.fa-calendar-times
+                h3.empty-state-title No bookings found
+                p.empty-state-text Start exploring amazing stays!
+                a.btn.btn-primary(href="/listings") Browse Listings
+
+  //- Cancel Modal
+  #cancelModal(style="display: none; position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; padding: 1rem;")
+    .auth-card(style="max-width: 400px;")
+      h3(style="font-weight: 700; margin-bottom: 1rem;") Cancel Booking
+      p(style="color: var(--gray-600); margin-bottom: 1rem;") Are you sure you want to cancel this booking? This action cannot be undone.
+      form#cancelForm(method="POST")
+        .form-group
+          label.form-label Reason for cancellation
+          textarea.form-input(name="reason" rows="3" placeholder="Please provide a reason...")
+        .flex.gap-2
+          button.btn.btn-secondary(type="button" onclick="hideCancelModal()") Keep Booking
+          button.btn.btn-primary(type="submit" style="background: var(--error);") Confirm Cancellation
+
+block scripts
+  script.
+    let currentBookingId = null;
+    
+    function showCancelModal(bookingId) {
+      currentBookingId = bookingId;
+      document.getElementById('cancelForm').action = '/customer/bookings/' + bookingId + '/cancel';
+      document.getElementById('cancelModal').style.display = 'flex';
+    }
+    
+    function hideCancelModal() {
+      document.getElementById('cancelModal').style.display = 'none';
+    }

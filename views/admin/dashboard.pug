@@ -1,0 +1,136 @@
+extends ../layouts/main
+
+block content
+  .container
+    .dashboard
+      aside.dashboard-sidebar
+        nav
+          a.sidebar-nav-item.active(href="/admin/dashboard")
+            i.fas.fa-tachometer-alt
+            span Dashboard
+          a.sidebar-nav-item(href="/admin/users")
+            i.fas.fa-users
+            span Users
+          a.sidebar-nav-item(href="/admin/listings")
+            i.fas.fa-home
+            span Listings
+          a.sidebar-nav-item(href="/admin/reports")
+            i.fas.fa-flag
+            span Reports
+          a.sidebar-nav-item(href="/admin/weather")
+            i.fas.fa-cloud-sun
+            span Weather
+      
+      main.dashboard-main
+        .dashboard-header
+          h1.dashboard-title Admin Dashboard
+          p.dashboard-subtitle Platform overview and management
+        
+        //- Stats
+        .stats-grid
+          .stat-card
+            .stat-card-header
+              .stat-icon
+                i.fas.fa-users
+            .stat-value= stats.users
+            .stat-label Total Users
+          
+          .stat-card
+            .stat-card-header
+              .stat-icon.secondary
+                i.fas.fa-home
+            .stat-value= stats.listings
+            .stat-label Total Listings
+          
+          .stat-card
+            .stat-card-header
+              .stat-icon.purple
+                i.fas.fa-calendar-check
+            .stat-value= stats.bookings
+            .stat-label Total Bookings
+          
+          .stat-card
+            .stat-card-header
+              .stat-icon.gold
+                i.fas.fa-clock
+            .stat-value= stats.pendingListings
+            .stat-label Pending Approval
+          
+          .stat-card
+            .stat-card-header
+              .stat-icon(style="background: linear-gradient(135deg, var(--error) 0%, #dc2626 100%);")
+                i.fas.fa-flag
+            .stat-value= stats.pendingReports
+            .stat-label Open Reports
+        
+        //- Quick Actions
+        .dashboard-card
+          .dashboard-card-header
+            h3.dashboard-card-title Quick Actions
+          .dashboard-card-body
+            .flex.gap-4.flex-wrap
+              a.btn.btn-secondary(href="/admin/listings?status=pending")
+                i.fas.fa-clock
+                span Pending Listings (#{stats.pendingListings})
+              a.btn.btn-secondary(href="/admin/reports?status=pending")
+                i.fas.fa-flag
+                span Open Reports (#{stats.pendingReports})
+              a.btn.btn-secondary(href="/admin/users?role=host&status=pending")
+                i.fas.fa-user-check
+                span Verify Hosts
+              a.btn.btn-secondary(href="/admin/weather")
+                i.fas.fa-cloud-sun
+                span Update Weather
+        
+        //- Recent Users
+        .dashboard-card
+          .dashboard-card-header
+            h3.dashboard-card-title Recent Users
+            a.btn.btn-sm.btn-secondary(href="/admin/users") View All
+          .dashboard-card-body
+            if recentUsers && recentUsers.length > 0
+              .table-responsive
+                table.table
+                  thead
+                    tr
+                      th User
+                      th Role
+                      th Status
+                      th Joined
+                  tbody
+                    each u in recentUsers
+                      tr
+                        td
+                          .flex.items-center.gap-2
+                            .review-avatar(style="width: 32px; height: 32px; font-size: 0.75rem;")= u.name ? u.name.charAt(0).toUpperCase() : 'U'
+                            div
+                              p(style="font-weight: 500;")= u.name
+                              p(style="font-size: 0.75rem; color: var(--gray-500);")= u.email
+                        td
+                          span.badge(class=u.role === 'host' ? 'badge-info' : 'badge-gray')= u.role
+                        td
+                          span.badge(class=`badge-${u.status === 'active' ? 'success' : u.status === 'pending' ? 'warning' : 'error'}`)= u.status
+                        td= new Date(u.created_at).toLocaleDateString('en-MY')
+        
+        //- Recent Bookings
+        .dashboard-card
+          .dashboard-card-header
+            h3.dashboard-card-title Recent Bookings
+          .dashboard-card-body
+            if recentBookings && recentBookings.length > 0
+              .table-responsive
+                table.table
+                  thead
+                    tr
+                      th Guest
+                      th Property
+                      th Dates
+                      th Status
+                  tbody
+                    each booking in recentBookings
+                      tr
+                        td= booking.customer_name
+                        td= booking.listing_title
+                        td #{new Date(booking.check_in).toLocaleDateString('en-MY')} - #{new Date(booking.check_out).toLocaleDateString('en-MY')}
+                        td
+                          span.badge(class=`badge-${booking.status === 'confirmed' ? 'success' : booking.status === 'pending' ? 'warning' : 'gray'}`)= booking.status

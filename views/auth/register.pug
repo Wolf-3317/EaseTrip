@@ -1,0 +1,46 @@
+extends ../layouts/main
+
+block content
+  .auth-page
+    .auth-container
+      .auth-card
+        .auth-header
+          h1.auth-title Create an account
+          p.auth-subtitle Join EaseTrip and start exploring Malaysia
+        
+        form(action="/register" method="POST")
+          .form-group
+            label.form-label(for="name") Full Name
+            input.form-input#name(type="text" name="name" placeholder="Enter your full name" value=(typeof name !== 'undefined' ? name : '') required)
+          
+          .form-group
+            label.form-label(for="email") Email
+            input.form-input#email(type="email" name="email" placeholder="Enter your email" value=(typeof email !== 'undefined' ? email : '') required)
+          
+          .form-group
+            label.form-label(for="phone") Phone Number
+            input.form-input#phone(type="tel" name="phone" placeholder="e.g., +60123456789" value=(typeof phone !== 'undefined' ? phone : ''))
+          
+          .form-group
+            label.form-label(for="password") Password
+            input.form-input#password(type="password" name="password" placeholder="Create a password (min. 6 characters)" required)
+          
+          .form-group
+            label.form-label(for="confirmPassword") Confirm Password
+            input.form-input#confirmPassword(type="password" name="confirmPassword" placeholder="Confirm your password" required)
+          
+          .form-group
+            label.form-label Account Type
+            .flex.gap-4
+              label.form-checkbox
+                input(type="radio" name="role" value="customer" checked=(typeof role === 'undefined' || role === 'customer'))
+                span Customer
+              label.form-checkbox
+                input(type="radio" name="role" value="host" checked=(typeof role !== 'undefined' && role === 'host'))
+                span Host
+          
+          button.btn.btn-primary.btn-lg(type="submit" style="width: 100%;") Create Account
+        
+        .auth-footer
+          p Already have an account? 
+            a(href="/login") Log in

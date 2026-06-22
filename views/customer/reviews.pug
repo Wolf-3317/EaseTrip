@@ -1,0 +1,68 @@
+extends ../layouts/main
+
+block content
+  .container
+    .dashboard
+      aside.dashboard-sidebar
+        nav
+          a.sidebar-nav-item(href="/customer/dashboard")
+            i.fas.fa-th-large
+            span Dashboard
+          a.sidebar-nav-item(href="/customer/trips")
+            i.fas.fa-suitcase
+            span My Trips
+          a.sidebar-nav-item(href="/customer/bookings")
+            i.fas.fa-calendar-check
+            span Bookings
+          a.sidebar-nav-item(href="/customer/favorites")
+            i.fas.fa-heart
+            span Favorites
+          a.sidebar-nav-item.active(href="/customer/reviews")
+            i.fas.fa-star
+            span My Reviews
+          a.sidebar-nav-item(href="/customer/inbox")
+            i.fas.fa-envelope
+            span Inbox
+          a.sidebar-nav-item(href="/profile")
+            i.fas.fa-user-circle
+            span Profile
+      
+      main.dashboard-main
+        .dashboard-header
+          h1.dashboard-title My Reviews
+          p.dashboard-subtitle Reviews you've written for places you've stayed
+        
+        .dashboard-card
+          .dashboard-card-body
+            if reviews && reviews.length > 0
+              each review in reviews
+                .review-item(style="padding: 1.5rem; background: var(--gray-50); border-radius: var(--radius-lg); margin-bottom: 1rem;")
+                  .flex.justify-between.items-start.mb-3
+                    .flex.items-center.gap-4
+                      img(src=review.listing_image || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=150' style="width: 80px; height: 60px; object-fit: cover; border-radius: var(--radius-md);")
+                      div
+                        h4(style="font-weight: 600; color: var(--gray-900);")= review.listing_title
+                        p(style="font-size: 0.75rem; color: var(--gray-500);") Reviewed on #{new Date(review.created_at).toLocaleDateString('en-MY', {year: 'numeric', month: 'long', day: 'numeric'})}
+                    div(style="text-align: right;")
+                      .flex.items-center.gap-1(style="color: var(--accent-gold);")
+                        - var rating = typeof review.rating === 'number' ? review.rating : parseFloat(review.rating) || 0
+                        each star in [1,2,3,4,5]
+                          if star <= rating
+                            i.fas.fa-star
+                          else
+                            i.far.fa-star
+                        span(style="margin-left: 0.5rem; font-weight: 600;")= rating.toFixed(1)
+                  
+                  p(style="color: var(--gray-700); line-height: 1.6; margin-bottom: 1rem;")= review.comment || 'No comment provided'
+                  
+                  .flex.gap-2
+                    a.btn.btn-sm.btn-secondary(href=`/customer/reviews/${review.id}/edit`)
+                      i.fas.fa-edit
+                      span Edit
+            else
+              .empty-state
+                .empty-state-icon
+                  i.fas.fa-star
+                h3.empty-state-title No reviews yet
+                p.empty-state-text Once you've stayed somewhere, come back here to share your experience!
+                a.btn.btn-primary(href="/customer/bookings") View Bookings

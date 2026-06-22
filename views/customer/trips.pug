@@ -1,0 +1,90 @@
+extends ../layouts/main
+
+block content
+  .container
+    .dashboard
+      aside.dashboard-sidebar
+        nav
+          a.sidebar-nav-item(href="/customer/dashboard")
+            i.fas.fa-th-large
+            span Dashboard
+          a.sidebar-nav-item.active(href="/customer/trips")
+            i.fas.fa-suitcase
+            span My Trips
+          a.sidebar-nav-item(href="/customer/bookings")
+            i.fas.fa-calendar-check
+            span Bookings
+          a.sidebar-nav-item(href="/customer/favorites")
+            i.fas.fa-heart
+            span Favorites
+          a.sidebar-nav-item(href="/customer/reviews")
+            i.fas.fa-star
+            span My Reviews
+          a.sidebar-nav-item(href="/customer/inbox")
+            i.fas.fa-envelope
+            span Inbox
+          a.sidebar-nav-item(href="/profile")
+            i.fas.fa-user-circle
+            span Profile
+      
+      main.dashboard-main
+        .dashboard-header
+          h1.dashboard-title My Trips
+          p.dashboard-subtitle View your upcoming and past adventures
+        
+        //- Upcoming Trips
+        .dashboard-card
+          .dashboard-card-header
+            h3.dashboard-card-title Upcoming Trips
+          .dashboard-card-body
+            if upcomingTrips && upcomingTrips.length > 0
+              each trip in upcomingTrips
+                .flex.items-center.gap-4.mb-4(style="padding: 1.5rem; background: var(--gray-50); border-radius: var(--radius-xl); flex-wrap: wrap;")
+                  img(src=trip.listing_image || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=200' alt=trip.listing_title style="width: 120px; height: 90px; object-fit: cover; border-radius: var(--radius-lg);")
+                  div(style="flex: 1; min-width: 200px;")
+                    h4(style="font-weight: 700; color: var(--gray-900); margin-bottom: 0.25rem;")= trip.listing_title
+                    p(style="font-size: 0.875rem; color: var(--gray-500); margin-bottom: 0.5rem;")
+                      i.fas.fa-map-marker-alt(style="margin-right: 0.25rem;")
+                      = trip.listing_city
+                    p(style="font-size: 0.875rem; color: var(--gray-700);")
+                      i.fas.fa-calendar(style="margin-right: 0.25rem;")
+                      | #{new Date(trip.check_in).toLocaleDateString('en-MY', {weekday: 'short', month: 'short', day: 'numeric'})} - #{new Date(trip.check_out).toLocaleDateString('en-MY', {weekday: 'short', month: 'short', day: 'numeric'})}
+                  div(style="text-align: right;")
+                    span.badge.badge-success(style="margin-bottom: 0.5rem; display: inline-block;")= trip.status
+                    p(style="font-weight: 700; color: var(--gray-900);") RM #{trip.total_price}
+                    .flex.gap-2.mt-4
+                      button.btn.btn-sm.btn-secondary(type="button" onclick=`showWeatherPopup('${trip.listing_city}')`)
+                        i.fas.fa-cloud-sun
+                        span Weather
+                      a.btn.btn-sm.btn-primary(href=`/listings/${trip.listing_id}`) View
+            else
+              .empty-state
+                .empty-state-icon
+                  i.fas.fa-plane-departure
+                h3.empty-state-title No upcoming trips
+                p.empty-state-text Your next adventure is just a click away
+                a.btn.btn-primary(href="/listings") Explore Stays
+        
+        //- Past Trips
+        .dashboard-card
+          .dashboard-card-header
+            h3.dashboard-card-title Past Trips
+          .dashboard-card-body
+            if pastTrips && pastTrips.length > 0
+              each trip in pastTrips
+                .flex.items-center.gap-4.mb-4(style="padding: 1.5rem; background: var(--gray-50); border-radius: var(--radius-xl); flex-wrap: wrap;")
+                  img(src=trip.listing_image || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=200' alt=trip.listing_title style="width: 120px; height: 90px; object-fit: cover; border-radius: var(--radius-lg);")
+                  div(style="flex: 1; min-width: 200px;")
+                    h4(style="font-weight: 700; color: var(--gray-900);")= trip.listing_title
+                    p(style="font-size: 0.875rem; color: var(--gray-500);")
+                      | #{new Date(trip.check_in).toLocaleDateString('en-MY', {month: 'short', day: 'numeric'})} - #{new Date(trip.check_out).toLocaleDateString('en-MY', {month: 'short', day: 'numeric', year: 'numeric'})}
+                  div(style="text-align: right;")
+                    if trip.review_id
+                      span.badge.badge-success Reviewed
+                    else
+                      a.btn.btn-sm.btn-primary(href=`/customer/review/${trip.id}`)
+                        i.fas.fa-star
+                        span Leave Review
+            else
+              .empty-state(style="padding: 2rem;")
+                p(style="color: var(--gray-500);") No past trips yet

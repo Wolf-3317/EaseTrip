@@ -1,0 +1,114 @@
+extends ../layouts/main
+
+block content
+  .container
+    .dashboard
+      aside.dashboard-sidebar
+        nav
+          a.sidebar-nav-item(href="/customer/dashboard")
+            i.fas.fa-th-large
+            span Dashboard
+          a.sidebar-nav-item(href="/customer/trips")
+            i.fas.fa-suitcase
+            span My Trips
+          a.sidebar-nav-item(href="/customer/bookings")
+            i.fas.fa-calendar-check
+            span Bookings
+          a.sidebar-nav-item(href="/customer/favorites")
+            i.fas.fa-heart
+            span Favorites
+          a.sidebar-nav-item(href="/customer/inbox")
+            i.fas.fa-envelope
+            span Inbox
+      
+      main.dashboard-main
+        .dashboard-header
+          h1.dashboard-title Edit Review
+          p.dashboard-subtitle Update your review for #{review.listing_title}
+        
+        .dashboard-card
+          .dashboard-card-body
+            form(action=`/customer/reviews/${review.id}` method="POST")
+              //- Overall Rating
+              .form-group
+                label.form-label Overall Rating *
+                .rating-input#overallRating
+                  - var currentRating = typeof review.rating === 'number' ? review.rating : parseInt(review.rating) || 0
+                  each star in [1, 2, 3, 4, 5]
+                    if star <= currentRating
+                      i.fas.fa-star(data-rating=star onclick=`setRating('rating', ${star})` style="font-size: 2rem; cursor: pointer; color: var(--accent-gold); margin-right: 0.5rem;")
+                    else
+                      i.far.fa-star(data-rating=star onclick=`setRating('rating', ${star})` style="font-size: 2rem; cursor: pointer; color: var(--accent-gold); margin-right: 0.5rem;")
+                input(type="hidden" name="rating" id="ratingInput" value=currentRating required)
+              
+              //- Comment
+              .form-group
+                label.form-label Your Review *
+                textarea.form-input(name="comment" rows="5" required)= review.comment
+              
+              //- Detailed Ratings
+              h4(style="font-weight: 600; margin: 2rem 0 1rem;") Rate specific aspects
+              
+              .hero-search-form(style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;")
+                .form-group(style="margin-bottom: 0;")
+                  label.form-label Cleanliness
+                  select.form-input(name="cleanliness")
+                    - var cleanRating = review.cleanliness_rating || 5
+                    option(value="5" selected=cleanRating==5) ⭐⭐⭐⭐⭐ Excellent
+                    option(value="4" selected=cleanRating==4) ⭐⭐⭐⭐ Very Good
+                    option(value="3" selected=cleanRating==3) ⭐⭐⭐ Average
+                    option(value="2" selected=cleanRating==2) ⭐⭐ Below Average
+                    option(value="1" selected=cleanRating==1) ⭐ Poor
+                
+                .form-group(style="margin-bottom: 0;")
+                  label.form-label Communication
+                  select.form-input(name="communication")
+                    - var commRating = review.communication_rating || 5
+                    option(value="5" selected=commRating==5) ⭐⭐⭐⭐⭐ Excellent
+                    option(value="4" selected=commRating==4) ⭐⭐⭐⭐ Very Good
+                    option(value="3" selected=commRating==3) ⭐⭐⭐ Average
+                    option(value="2" selected=commRating==2) ⭐⭐ Below Average
+                    option(value="1" selected=commRating==1) ⭐ Poor
+                
+                .form-group(style="margin-bottom: 0;")
+                  label.form-label Location
+                  select.form-input(name="location")
+                    - var locRating = review.location_rating || 5
+                    option(value="5" selected=locRating==5) ⭐⭐⭐⭐⭐ Excellent
+                    option(value="4" selected=locRating==4) ⭐⭐⭐⭐ Very Good
+                    option(value="3" selected=locRating==3) ⭐⭐⭐ Average
+                    option(value="2" selected=locRating==2) ⭐⭐ Below Average
+                    option(value="1" selected=locRating==1) ⭐ Poor
+                
+                .form-group(style="margin-bottom: 0;")
+                  label.form-label Value for Money
+                  select.form-input(name="value")
+                    - var valRating = review.value_rating || 5
+                    option(value="5" selected=valRating==5) ⭐⭐⭐⭐⭐ Excellent
+                    option(value="4" selected=valRating==4) ⭐⭐⭐⭐ Very Good
+                    option(value="3" selected=valRating==3) ⭐⭐⭐ Average
+                    option(value="2" selected=valRating==2) ⭐⭐ Below Average
+                    option(value="1" selected=valRating==1) ⭐ Poor
+              
+              .flex.gap-4.mt-6
+                button.btn.btn-primary.btn-lg(type="submit")
+                  i.fas.fa-save
+                  span Update Review
+                a.btn.btn-secondary.btn-lg(href="/customer/reviews") Cancel
+
+block scripts
+  script.
+    function setRating(inputName, rating) {
+      document.getElementById(inputName + 'Input').value = rating;
+      const container = document.getElementById('overallRating');
+      const stars = container.querySelectorAll('i');
+      stars.forEach((star, index) => {
+        if (index < rating) {
+          star.classList.remove('far');
+          star.classList.add('fas');
+        } else {
+          star.classList.remove('fas');
+          star.classList.add('far');
+        }
+      });
+    }

@@ -1,0 +1,80 @@
+extends ../layouts/main
+
+block content
+  .container
+    .dashboard
+      aside.dashboard-sidebar
+        nav
+          a.sidebar-nav-item(href="/customer/dashboard")
+            i.fas.fa-th-large
+            span Dashboard
+          a.sidebar-nav-item(href="/customer/trips")
+            i.fas.fa-suitcase
+            span My Trips
+          a.sidebar-nav-item(href="/customer/bookings")
+            i.fas.fa-calendar-check
+            span Bookings
+          a.sidebar-nav-item.active(href="/customer/favorites")
+            i.fas.fa-heart
+            span Favorites
+          a.sidebar-nav-item(href="/customer/reviews")
+            i.fas.fa-star
+            span My Reviews
+          a.sidebar-nav-item(href="/customer/inbox")
+            i.fas.fa-envelope
+            span Inbox
+          a.sidebar-nav-item(href="/profile")
+            i.fas.fa-user-circle
+            span Profile
+      
+      main.dashboard-main
+        .dashboard-header
+          h1.dashboard-title My Favorites
+          p.dashboard-subtitle Your saved stays and experiences
+        
+        if favorites && favorites.length > 0
+          .listings-grid
+            each fav in favorites
+              .card.listing-card
+                a(href=`/listings/${fav.listing_id}`)
+                  .listing-card-image
+                    img(src=fav.primary_image || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400' alt=fav.title)
+                  .listing-card-content
+                    .listing-card-location
+                      i.fas.fa-map-marker-alt
+                      span= fav.city
+                    h3.listing-card-title= fav.title
+                    .listing-card-rating
+                      i.fas.fa-star
+                      span= fav.avg_rating ? parseFloat(fav.avg_rating).toFixed(1) : 'New'
+                    .listing-card-footer
+                      .listing-card-price
+                        | RM #{fav.price}
+                        span  / Night
+                      button.btn.btn-sm.btn-outline(onclick="removeFavorite(#{fav.listing_id})" style="color: var(--error); border-color: var(--error);")
+                        i.fas.fa-eye
+        else
+          .dashboard-card
+            .dashboard-card-body
+              .empty-state
+                .empty-state-icon
+                  i.fas.fa-heart
+                h3.empty-state-title No saved places yet
+                p.empty-state-text Start exploring and save your favorite stays!
+                a.btn.btn-primary(href="/listings") Browse Listings
+
+block scripts
+  script.
+    async function removeFavorite(listingId) {
+      try {
+        const response = await fetch('/customer/favorites/' + listingId, {
+          method: 'DELETE',
+          headers: { 'Accept': 'application/json' }
+        });
+        if (response.ok) {
+          window.location.reload();
+        }
+      } catch (error) {
+        console.error('Error removing favorite:', error);
+      }
+    }

@@ -1,0 +1,92 @@
+extends ../layouts/main
+
+block content
+  .container
+    .dashboard
+      aside.dashboard-sidebar
+        nav
+          a.sidebar-nav-item(href="/admin/dashboard")
+            i.fas.fa-tachometer-alt
+            span Dashboard
+          a.sidebar-nav-item(href="/admin/users")
+            i.fas.fa-users
+            span Users
+          a.sidebar-nav-item(href="/admin/listings")
+            i.fas.fa-home
+            span Listings
+          a.sidebar-nav-item(href="/admin/reports")
+            i.fas.fa-flag
+            span Reports
+          a.sidebar-nav-item.active(href="/admin/weather")
+            i.fas.fa-cloud-sun
+            span Weather
+
+      main.dashboard-main
+        .dashboard-header
+          h1.dashboard-title Weather Dashboard
+          p.dashboard-subtitle
+            | Live 7-day Weather forecasts by&nbsp;
+            a(href="https://developer.data.gov.my/realtime-api/weather" target="_blank" rel="noopener") MET Malaysia via data.gov.my
+
+        //- Live Weather Data Table
+        .dashboard-card
+          .dashboard-card-header
+            h3.dashboard-card-title Today's Forecast
+            span.badge.badge-info(style="margin-left: auto; font-size: 0.75rem;") Live — updates daily
+          .dashboard-card-body
+            if weatherData && weatherData.length > 0
+              .table-responsive
+                table.table
+                  thead
+                    tr
+                      th City
+                      th Date
+                      th Condition
+                      th Description
+                      th High °C
+                      th Low °C
+                      th Morning
+                      th Afternoon
+                      th Night
+                  tbody
+                    each weather in weatherData
+                      tr
+                        td= weather.city
+                        td= weather.date
+                        td
+                          span.badge.badge-info= weather.condition_main
+                        td(style="font-size: 0.85rem;")= weather.condition_description
+                        td
+                          if weather.temp_high
+                            | #{weather.temp_high}°C
+                          else
+                            | —
+                        td
+                          if weather.temp_low
+                            | #{weather.temp_low}°C
+                          else
+                            | —
+                        td(style="font-size: 0.8rem; color: var(--text-secondary);")
+                          if weather.morning_forecast
+                            | #{weather.morning_forecast}
+                          else
+                            | —
+                        td(style="font-size: 0.8rem; color: var(--text-secondary);")
+                          if weather.afternoon_forecast
+                            | #{weather.afternoon_forecast}
+                          else
+                            | —
+                        td(style="font-size: 0.8rem; color: var(--text-secondary);")
+                          if weather.night_forecast
+                            | #{weather.night_forecast}
+                          else
+                            | —
+            else
+              .empty-state(style="padding: 2rem;")
+                .empty-state-icon
+                  i.fas.fa-satellite-dish
+                h3.empty-state-title Could not load weather data
+                p.empty-state-text
+                  | The MET Malaysia API may be temporarily unavailable.
+                  | &nbsp;
+                  a(href="/admin/weather") Retry

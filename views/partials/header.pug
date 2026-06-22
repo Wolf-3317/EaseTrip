@@ -1,0 +1,75 @@
+header.header
+  .container
+    .header-content
+      //- Logo
+      a.logo(href="/")
+        i.fas.fa-plane-departure
+        span EaseTrip
+      
+      //- Search Bar (Desktop)
+      form.header-search(action="/listings" method="GET")
+        .search-input-group
+          input.search-input(type="text" name="search" placeholder="Where to?" value=(typeof filters !== 'undefined' && filters.search ? filters.search : ''))
+          button.search-btn(type="submit")
+            i.fas.fa-search
+      
+      //- Navigation
+      nav.nav
+        if user
+          //- Logged in user menu
+          .nav-dropdown
+            button.nav-dropdown-btn
+              .user-avatar-placeholder
+                = user.name ? user.name.charAt(0).toUpperCase() : 'U'
+              span.user-name= user.name
+              i.fas.fa-chevron-down
+            
+            .nav-dropdown-menu
+              if user.role === 'admin'
+                a.dropdown-item(href="/admin/dashboard")
+                  i.fas.fa-tachometer-alt
+                  span Admin Dashboard
+                .dropdown-divider
+              
+              if user.role === 'host'
+                a.dropdown-item(href="/host/dashboard")
+                  i.fas.fa-home
+                  span Host Dashboard
+                a.dropdown-item(href="/host/listings")
+                  i.fas.fa-list
+                  span My Listings
+                a.dropdown-item(href="/host/bookings")
+                  i.fas.fa-calendar-check
+                  span Bookings
+                .dropdown-divider
+              
+              if user.role === 'customer'
+                a.dropdown-item(href="/customer/dashboard")
+                  i.fas.fa-th-large
+                  span Dashboard
+                a.dropdown-item(href="/customer/trips")
+                  i.fas.fa-suitcase
+                  span My Trips
+                a.dropdown-item(href="/customer/favorites")
+                  i.fas.fa-heart
+                  span Favorites
+                a.dropdown-item(href="/customer/inbox")
+                  i.fas.fa-envelope
+                  span Inbox
+              
+              .dropdown-divider
+              a.dropdown-item(href="/profile")
+                i.fas.fa-user-circle
+                span Profile
+              a.dropdown-item.logout(href="/logout")
+                i.fas.fa-sign-out-alt
+                span Log out
+        else
+          //- Guest menu
+          .nav-links
+            a.nav-link(href="/login") Log in
+            a.nav-link.btn-primary(href="/register") Sign up
+
+      //- Mobile Menu Button
+      button.mobile-menu-btn
+        i.fas.fa-bars

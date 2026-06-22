@@ -1,0 +1,56 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    meta(name="description" content="EaseTrip - Discover Amazing Stays in Malaysia. Book unique Accommodations and Experiences.")
+    title= title || 'EaseTrip - Discover Malaysia'
+    
+    //- Google Fonts
+    link(rel="preconnect" href="https://fonts.googleapis.com")
+    link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
+    link(href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet")
+    
+    //- Font Awesome Icons
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css")
+    
+    //- Main Stylesheet
+    link(rel="stylesheet" href="/css/style.css")
+    
+  body
+    //- Header/Navigation
+    include ../partials/header
+    
+    //- Flash Messages
+    .container
+      if success_msg && success_msg.length > 0
+        .alert.alert-success
+          i.fas.fa-check-circle
+          span= success_msg
+      if error_msg && error_msg.length > 0
+        .alert.alert-error
+          i.fas.fa-exclamation-circle
+          span= error_msg
+      if error && error.length > 0
+        .alert.alert-error
+          i.fas.fa-exclamation-circle
+          span= error
+      if typeof errors !== 'undefined' && errors && errors.length > 0
+        each err in errors
+          .alert.alert-error
+            i.fas.fa-exclamation-circle
+            span= err
+    
+    //- Main Content
+    main.main-content
+      block content
+    
+    //- Footer
+    include ../partials/footer
+    
+    //- Weather Popup
+    include ../partials/weather-popup
+    
+    //- Main JavaScript
+    script(src="/js/main.js")
+    block scripts

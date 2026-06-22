@@ -1,0 +1,74 @@
+extends ../layouts/main
+
+block content
+  .container
+    .dashboard
+      aside.dashboard-sidebar
+        nav
+          a.sidebar-nav-item(href="/host/dashboard")
+            i.fas.fa-tachometer-alt
+            span Dashboard
+          a.sidebar-nav-item(href="/host/listings")
+            i.fas.fa-home
+            span My Listings
+          a.sidebar-nav-item(href="/host/bookings")
+            i.fas.fa-calendar-check
+            span Bookings
+          a.sidebar-nav-item.active(href="/host/reviews")
+            i.fas.fa-star
+            span Reviews
+          a.sidebar-nav-item(href="/host/inbox")
+            i.fas.fa-envelope
+            span Inbox
+          a.sidebar-nav-item(href="/profile")
+            i.fas.fa-user-circle
+            span Profile
+      
+      main.dashboard-main
+        .dashboard-header
+          h1.dashboard-title Reviews
+          p.dashboard-subtitle See what guests are saying about your properties
+        
+        .dashboard-card
+          .dashboard-card-body
+            if reviews && reviews.length > 0
+              each review in reviews
+                .review-item(style="margin-bottom: 1.5rem; padding: 1.5rem; background: var(--gray-50); border-radius: var(--radius-lg);")
+                  .flex.justify-between.items-start.mb-3
+                    .flex.items-center.gap-3
+                      .review-avatar= review.customer_name ? review.customer_name.charAt(0).toUpperCase() : 'G'
+                      div
+                        p(style="font-weight: 600; color: var(--gray-900);")= review.customer_name
+                        p(style="font-size: 0.75rem; color: var(--gray-500);")= new Date(review.created_at).toLocaleDateString('en-MY')
+                    div(style="text-align: right;")
+                      .flex.items-center.gap-1(style="color: var(--accent-gold);")
+                        - var rating = typeof review.rating === 'number' ? review.rating : parseFloat(review.rating) || 0
+                        each star in [1,2,3,4,5]
+                          if star <= rating
+                            i.fas.fa-star
+                          else
+                            i.far.fa-star
+                        span(style="margin-left: 0.5rem; font-weight: 600;")= rating.toFixed(1)
+                      p(style="font-size: 0.75rem; color: var(--gray-500); margin-top: 0.25rem;")= review.listing_title
+                  
+                  p(style="color: var(--gray-700); line-height: 1.6;")= review.comment || 'No comment provided'
+                  
+                  if review.is_reported
+                    .flex.justify-end.mt-3
+                      span.badge.badge-warning
+                        i.fas.fa-flag(style="margin-right: 0.25rem;")
+                        | Reported
+                  else
+                    .flex.justify-end.mt-3
+                      form(action=`/host/reviews/${review.id}/report` method="POST" style="display: inline;")
+                        input(type="hidden" name="reason" value="inappropriate")
+                        input(type="hidden" name="description" value="Reported by host")
+                        button.btn.btn-sm.btn-outline(type="submit" style="color: var(--gray-500);")
+                          i.fas.fa-flag
+                          span Report
+            else
+              .empty-state
+                .empty-state-icon
+                  i.fas.fa-star
+                h3.empty-state-title No reviews yet
+                p.empty-state-text Reviews will appear here after guests complete their stays

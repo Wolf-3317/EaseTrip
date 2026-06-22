@@ -1,0 +1,111 @@
+extends ../layouts/main
+
+block content
+  .container
+    .dashboard
+      aside.dashboard-sidebar
+        nav
+          a.sidebar-nav-item(href="/admin/dashboard")
+            i.fas.fa-tachometer-alt
+            span Dashboard
+          a.sidebar-nav-item.active(href="/admin/users")
+            i.fas.fa-users
+            span Users
+          a.sidebar-nav-item(href="/admin/listings")
+            i.fas.fa-home
+            span Listings
+          a.sidebar-nav-item(href="/admin/reports")
+            i.fas.fa-flag
+            span Reports
+          a.sidebar-nav-item(href="/admin/weather")
+            i.fas.fa-cloud-sun
+            span Weather
+      
+      main.dashboard-main
+        .dashboard-header
+          h1.dashboard-title Manage Users
+          p.dashboard-subtitle View and manage all platform users
+        
+        //- Filters
+        form.dashboard-card(action="/admin/users" method="GET" style="margin-bottom: 1.5rem;")
+          .dashboard-card-body
+            .hero-search-form(style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; align-items: end;")
+              .form-group(style="margin-bottom: 0;")
+                label.form-label Role
+                select.form-input(name="role")
+                  option(value="" selected=!filters.role) All Roles
+                  option(value="customer" selected=filters.role === 'customer') Customer
+                  option(value="host" selected=filters.role === 'host') Host
+              .form-group(style="margin-bottom: 0;")
+                label.form-label Status
+                select.form-input(name="status")
+                  option(value="" selected=!filters.status) All Status
+                  option(value="active" selected=filters.status === 'active') Active
+                  option(value="pending" selected=filters.status === 'pending') Pending
+                  option(value="suspended" selected=filters.status === 'suspended') Suspended
+                  option(value="banned" selected=filters.status === 'banned') Banned
+              .form-group(style="margin-bottom: 0;")
+                label.form-label Search
+                input.form-input(type="text" name="search" placeholder="Name or email" value=filters.search)
+              .form-group(style="margin-bottom: 0;")
+                button.btn.btn-primary(type="submit" style="width: 100%;")
+                  i.fas.fa-search
+                  span Filter
+        
+        //- Users Table
+        .dashboard-card
+          .dashboard-card-body
+            if users && users.length > 0
+              .table-responsive
+                table.table
+                  thead
+                    tr
+                      th User
+                      th Role
+                      th Status
+                      th Verified
+                      th Joined
+                      th Actions
+                  tbody
+                    each u in users
+                      tr
+                        td
+                          .flex.items-center.gap-3
+                            .review-avatar(style="width: 40px; height: 40px;")= u.name ? u.name.charAt(0).toUpperCase() : 'U'
+                            div
+                              p(style="font-weight: 600;")= u.name
+                              p(style="font-size: 0.75rem; color: var(--gray-500);")= u.email
+                        td
+                          span.badge(class=u.role === 'host' ? 'badge-info' : 'badge-gray')= u.role
+                        td
+                          span.badge(class=`badge-${u.status === 'active' ? 'success' : u.status === 'pending' ? 'warning' : 'error'}`)= u.status
+                        td
+                          if u.identity_verified
+                            i.fas.fa-check-circle(style="color: var(--success);")
+                          else
+                            i.fas.fa-times-circle(style="color: var(--gray-400);")
+                        td= new Date(u.created_at).toLocaleDateString('en-MY')
+                        td
+                          .flex.gap-2
+                            if u.role === 'host' && !u.identity_verified
+                              form(action=`/admin/users/${u.id}/verify` method="POST" style="display: inline;")
+                                button.btn.btn-sm.btn-primary(type="submit" title="Verify")
+                                  i.fas.fa-check
+                            if u.status === 'active'
+                              form(action=`/admin/users/${u.id}/status` method="POST" style="display: inline;")
+                                input(type="hidden" name="status" value="suspended")
+                                button.btn.btn-sm.btn-outline(type="submit" style="color: var(--warning); border-color: var(--warning);" title="Suspend")
+                                  i.fas.fa-pause
+                            else if u.status === 'suspended'
+                              form(action=`/admin/users/${u.id}/status` method="POST" style="display: inline;")
+                                input(type="hidden" name="status" value="active")
+                                button.btn.btn-sm.btn-outline(type="submit" style="color: var(--success); border-color: var(--success);" title="Activate")
+                                  i.fas.fa-play
+                            if u.status !== 'banned'
+                              form(action=`/admin/users/${u.id}/status` method="POST" style="display: inline;")
+                                input(type="hidden" name="status" value="banned")
+                                button.btn.btn-sm.btn-outline(type="submit" style="color: var(--error); border-color: var(--error);" title="Ban")
+                                  i.fas.fa-ban
+            else
+              .empty-state
+                p(style="color: var(--gray-500);") No users found

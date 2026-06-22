@@ -1,0 +1,132 @@
+extends ../layouts/main
+
+block content
+  .container
+    .dashboard
+      aside.dashboard-sidebar
+        nav
+          a.sidebar-nav-item.active(href="/host/dashboard")
+            i.fas.fa-tachometer-alt
+            span Dashboard
+          a.sidebar-nav-item(href="/host/listings")
+            i.fas.fa-home
+            span My Listings
+          a.sidebar-nav-item(href="/host/bookings")
+            i.fas.fa-calendar-check
+            span Bookings
+          a.sidebar-nav-item(href="/host/reviews")
+            i.fas.fa-star
+            span Reviews
+          a.sidebar-nav-item(href="/host/inbox")
+            i.fas.fa-envelope
+            span Inbox
+          a.sidebar-nav-item(href="/profile")
+            i.fas.fa-user-circle
+            span Profile
+      
+      main.dashboard-main
+        .dashboard-header
+          h1.dashboard-title Host Dashboard
+          p.dashboard-subtitle Welcome back, #{user.name}!
+        
+        //- Stats
+        .stats-grid
+          .stat-card
+            .stat-card-header
+              .stat-icon
+                i.fas.fa-home
+            .stat-value= stats.listings
+            .stat-label Active Listings
+          
+          .stat-card
+            .stat-card-header
+              .stat-icon.secondary
+                i.fas.fa-calendar-check
+            .stat-value= stats.bookings
+            .stat-label Total Bookings
+          
+          .stat-card
+            .stat-card-header
+              .stat-icon.gold
+                i.fas.fa-star
+            .stat-value= stats.bookings
+            .stat-label Completed Stays
+          
+          .stat-card
+            .stat-card-header
+              .stat-icon.purple
+                i.fas.fa-clock
+            .stat-value= bookingStats.pending
+            .stat-label Pending Requests
+        
+        //- Quick Actions
+        .dashboard-card
+          .dashboard-card-header
+            h3.dashboard-card-title Quick Actions
+          .dashboard-card-body
+            .flex.gap-4.flex-wrap
+              a.btn.btn-primary(href="/host/listings/create")
+                i.fas.fa-plus
+                span Create Listing
+              a.btn.btn-secondary(href="/host/bookings?status=pending")
+                i.fas.fa-clock
+                span Pending Bookings (#{bookingStats.pending})
+        
+        //- Recent Bookings
+        .dashboard-card
+          .dashboard-card-header
+            h3.dashboard-card-title Recent Bookings
+            a.btn.btn-sm.btn-secondary(href="/host/bookings") View All
+          .dashboard-card-body
+            if recentBookings && recentBookings.length > 0
+              .table-responsive
+                table.table
+                  thead
+                    tr
+                      th Guest
+                      th Property
+                      th Dates
+                      th Status
+                      th Actions
+                  tbody
+                    each booking in recentBookings
+                      tr
+                        td
+                          .flex.items-center.gap-2
+                            .review-avatar(style="width: 32px; height: 32px; font-size: 0.75rem;")= booking.customer_name ? booking.customer_name.charAt(0).toUpperCase() : 'G'
+                            span= booking.customer_name
+                        td= booking.listing_title
+                        td #{new Date(booking.check_in).toLocaleDateString('en-MY')} - #{new Date(booking.check_out).toLocaleDateString('en-MY')}
+                        td
+                          span.badge(class=`badge-${booking.status === 'confirmed' ? 'success' : booking.status === 'pending' ? 'warning' : 'gray'}`)= booking.status
+                        td
+                          if booking.status === 'pending'
+                            form(action=`/host/bookings/${booking.id}/update` method="POST" style="display: inline;")
+                              input(type="hidden" name="action" value="confirm")
+                              button.btn.btn-sm.btn-primary(type="submit") Confirm
+            else
+              .empty-state(style="padding: 2rem;")
+                p(style="color: var(--gray-500);") No bookings yet
+        
+        //- My Listings
+        .dashboard-card
+          .dashboard-card-header
+            h3.dashboard-card-title My Listings
+            a.btn.btn-sm.btn-secondary(href="/host/listings") View All
+          .dashboard-card-body
+            if listings && listings.length > 0
+              .listings-grid(style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));")
+                each listing in listings
+                  a.card.listing-card(href=`/host/listings/${listing.id}/edit`)
+                    .listing-card-image(style="aspect-ratio: 16/10;")
+                      img(src=listing.primary_image || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=300' alt=listing.title)
+                      span.listing-card-badge(class=listing.status === 'active' ? '' : 'badge-warning')= listing.status
+                    .listing-card-content(style="padding: 0.75rem;")
+                      h3.listing-card-title(style="font-size: 0.875rem;")= listing.title
+                      .flex.justify-between.items-center(style="font-size: 0.75rem; color: var(--gray-500);")
+                        span #{listing.booking_count || 0} bookings
+                        span RM #{listing.price}/night
+            else
+              .empty-state(style="padding: 2rem;")
+                p(style="color: var(--gray-500);") No listings yet
+                a.btn.btn-primary(href="/host/listings/create") Create Your First Listing

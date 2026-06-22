@@ -1,0 +1,82 @@
+extends ../layouts/main
+
+block content
+  .container
+    .section
+      //- Page Header
+      .section-header
+        div
+          h1.section-title Browse Listings
+          p.section-subtitle Discover amazing stays across Malaysia
+      
+      //- Filters
+      form.dashboard-card(action="/listings" method="GET" style="margin-bottom: 2rem;")
+        .dashboard-card-body
+          .hero-search-form(style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; align-items: end;")
+            .form-group(style="margin-bottom: 0;")
+              label.form-label Location
+              input.form-input(type="text" name="city" placeholder="Any destination" value=(filters.city || ''))
+            
+            .form-group(style="margin-bottom: 0;")
+              label.form-label Type
+              select.form-input(name="type")
+                option(value="" selected=!filters.type) All Types
+                option(value="accommodation" selected=(filters.type === 'accommodation')) Accommodation
+                option(value="activity" selected=(filters.type === 'activity')) Activity
+                option(value="event" selected=(filters.type === 'event')) Event
+            
+            .form-group(style="margin-bottom: 0;")
+              label.form-label Min Price (RM)
+              input.form-input(type="number" name="minPrice" placeholder="0" value=(filters.minPrice || ''))
+            
+            .form-group(style="margin-bottom: 0;")
+              label.form-label Max Price (RM)
+              input.form-input(type="number" name="maxPrice" placeholder="Any" value=(filters.maxPrice || ''))
+            
+            .form-group(style="margin-bottom: 0;")
+              label.form-label Sort By
+              select.form-input(name="sort")
+                option(value="newest" selected=(filters.sort === 'newest' || !filters.sort)) Newest
+                option(value="price_asc" selected=(filters.sort === 'price_asc')) Price: Low to High
+                option(value="price_desc" selected=(filters.sort === 'price_desc')) Price: High to Low
+                option(value="rating" selected=(filters.sort === 'rating')) Top Rated
+            
+            .form-group(style="margin-bottom: 0;")
+              button.btn.btn-primary(type="submit" style="width: 100%;")
+                i.fas.fa-search
+                span Search
+      
+      //- Results
+      if listings && listings.length > 0
+        .listings-grid
+          each listing in listings
+            a.card.listing-card(href=`/listings/${listing.id}`)
+              .listing-card-image
+                if listing.primary_image
+                  img(src=listing.primary_image alt=listing.title)
+                else
+                  img(src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400" alt=listing.title)
+                if user
+                  button.listing-card-favorite(type="button" onclick="event.preventDefault(); toggleFavorite(this, " + listing.id + ")")
+                    i.far.fa-heart
+              .listing-card-content
+                .listing-card-location
+                  i.fas.fa-map-marker-alt
+                  span= listing.city
+                h3.listing-card-title= listing.title
+                .listing-card-rating
+                  i.fas.fa-star
+                  span= listing.avg_rating ? parseFloat(listing.avg_rating).toFixed(1) : 'New'
+                  span.reviews (#{listing.review_count || 0} Reviews)
+                .listing-card-footer
+                  .listing-card-price
+                    | RM #{listing.price}
+                    span  / Night
+                  span.badge.badge-info= listing.type
+      else
+        .empty-state
+          .empty-state-icon
+            i.fas.fa-search
+          h3.empty-state-title No Listings found
+          p.empty-state-text Try adjusting your search filters
+          a.btn.btn-primary(href="/listings") Clear Filters

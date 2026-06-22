@@ -1,0 +1,70 @@
+extends ../layouts/main
+
+block content
+  .container
+    .dashboard
+      aside.dashboard-sidebar
+        nav
+          a.sidebar-nav-item(href="/host/dashboard")
+            i.fas.fa-th-large
+            span Dashboard
+          a.sidebar-nav-item(href="/host/listings")
+            i.fas.fa-list
+            span My Listings
+          a.sidebar-nav-item(href="/host/bookings")
+            i.fas.fa-calendar-check
+            span Bookings
+          a.sidebar-nav-item(href="/host/reviews")
+            i.fas.fa-star
+            span Reviews
+          a.sidebar-nav-item.active(href="/host/inbox")
+            i.fas.fa-envelope
+            span Inbox
+            if unreadCount > 0
+              span.badge.badge-error(style="margin-left: auto;")= unreadCount
+          a.sidebar-nav-item(href="/profile")
+            i.fas.fa-user-circle
+            span Profile
+      
+      main.dashboard-main
+        .dashboard-header
+          h1.dashboard-title Inbox
+          p.dashboard-subtitle Messages from guests and customers
+        
+        .dashboard-card
+          .dashboard-card-body
+            if messages && messages.length > 0
+              each msg in messages
+                - const isNew = (msg.receiver_id === currentUserId) && (!msg.is_read);
+                - const otherId = (msg.sender_id === currentUserId) ? msg.receiver_id : msg.sender_id;
+                - const otherName = (msg.sender_id === currentUserId) ? msg.receiver_name : msg.sender_name;
+                - const avatarLetter = otherName ? otherName.charAt(0).toUpperCase() : 'U';
+
+                a.flex.items-center.gap-4.message-item(
+                  href=`/host/inbox/conversation/${otherId}`
+                  style=`padding: 1rem; border-bottom: 1px solid var(--gray-100); transition: all 0.2s; display: flex; ${isNew ? 'background: rgba(255, 107, 107, 0.05);' : ''}`
+                )
+                  .review-avatar(style=isNew ? 'background: var(--primary-gradient);' : 'background: var(--gray-400);')= avatarLetter
+                  div(style="flex: 1; min-width: 0;")
+                    .flex.items-center.gap-2
+                      h4(style=`font-weight: ${isNew ? '700' : '500'}; color: var(--gray-900);`)= otherName
+                      if msg.is_system_message
+                        span.badge.badge-info(style="font-size: 0.625rem;") System
+                    p(style="font-size: 0.875rem; color: var(--gray-600); margin-top: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;")= msg.content
+                  div(style="text-align: right; min-width: 80px; flex-shrink: 0;")
+                    p(style="font-size: 0.75rem; color: var(--gray-400);")= new Date(msg.created_at).toLocaleDateString('en-MY')
+                    if isNew
+                      span.badge.badge-error(style="margin-top: 0.25rem;") New
+
+            else
+              .empty-state
+                .empty-state-icon
+                  i.fas.fa-envelope-open
+                h3.empty-state-title No messages yet
+                p.empty-state-text Messages from guests will appear here
+
+block scripts
+  style.
+    .message-item:hover {
+      background: var(--gray-50) !important;
+    }

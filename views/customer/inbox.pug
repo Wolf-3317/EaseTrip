@@ -1,0 +1,57 @@
+extends ../layouts/main
+
+block content
+  .container
+    .dashboard
+      aside.dashboard-sidebar
+        nav
+          a.sidebar-nav-item(href="/customer/dashboard")
+            i.fas.fa-th-large
+            span Dashboard
+          a.sidebar-nav-item(href="/customer/trips")
+            i.fas.fa-suitcase
+            span My Trips
+          a.sidebar-nav-item(href="/customer/bookings")
+            i.fas.fa-calendar-check
+            span Bookings
+          a.sidebar-nav-item(href="/customer/favorites")
+            i.fas.fa-heart
+            span Favorites
+          a.sidebar-nav-item(href="/customer/reviews")
+            i.fas.fa-star
+            span My Reviews
+          a.sidebar-nav-item.active(href="/customer/inbox")
+            i.fas.fa-envelope
+            span Inbox
+          a.sidebar-nav-item(href="/profile")
+            i.fas.fa-user-circle
+            span Profile
+      
+      main.dashboard-main
+        .dashboard-header
+          h1.dashboard-title Inbox
+          p.dashboard-subtitle Your messages and notifications
+        
+        .dashboard-card
+          .dashboard-card-body
+            if messages && messages.length > 0
+              each msg in messages
+                a.flex.items-center.gap-4(href=`/customer/inbox/conversation/${msg.sender_id}` style=`padding: 1rem; border-bottom: 1px solid var(--gray-100); transition: background 0.2s; ${!msg.is_read ? 'background: rgba(255, 107, 107, 0.05);' : ''}`)
+                  .review-avatar(style=!msg.is_read ? 'background: var(--primary-gradient);' : 'background: var(--gray-400);')= msg.sender_name ? msg.sender_name.charAt(0).toUpperCase() : 'S'
+                  div(style="flex: 1;")
+                    .flex.items-center.gap-2
+                      h4(style=`font-weight: ${!msg.is_read ? '700' : '500'}; color: var(--gray-900);`)= msg.sender_name
+                      if msg.is_system_message
+                        span.badge.badge-info(style="font-size: 0.625rem;") System
+                    p(style="font-size: 0.875rem; color: var(--gray-600); margin-top: 0.25rem;")= msg.subject || 'No subject'
+                    p(style="font-size: 0.75rem; color: var(--gray-400); margin-top: 0.25rem;")= msg.content.substring(0, 60) + (msg.content.length > 60 ? '...' : '')
+                  div(style="text-align: right; min-width: 80px;")
+                    p(style="font-size: 0.75rem; color: var(--gray-400);")= new Date(msg.created_at).toLocaleDateString('en-MY')
+                    if !msg.is_read
+                      span.badge.badge-error(style="margin-top: 0.25rem;") New
+            else
+              .empty-state
+                .empty-state-icon
+                  i.fas.fa-envelope-open
+                h3.empty-state-title No messages yet
+                p.empty-state-text You'll receive notifications and messages from hosts here

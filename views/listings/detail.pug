@@ -1,0 +1,238 @@
+extends ../layouts/main
+
+block content
+  .container.listing-detail
+    //- Image Gallery
+    .listing-gallery
+      .listing-gallery-main
+        if listing.images && listing.images.length > 0
+          img(src=listing.images[0].image_url alt=listing.title)
+        else
+          img(src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800" alt=listing.title)
+      if listing.images && listing.images.length > 1
+        each img, index in listing.images.slice(1, 5)
+          div
+            img(src=img.image_url alt=`${listing.title} - Image ${index + 2}`)
+    
+    .listing-content
+      //- Listing Info
+      .listing-info
+        h1= listing.title
+        
+        .listing-meta
+          .listing-meta-item
+            i.fas.fa-map-marker-alt
+            span= `${listing.address || ''} ${listing.city}, ${listing.state || 'Malaysia'}`
+          .listing-meta-item
+            i.fas.fa-users
+            span #{listing.max_guests} guests
+          .listing-meta-item
+            i.fas.fa-bed
+            span #{listing.bedrooms} bedrooms
+          .listing-meta-item
+            i.fas.fa-bath
+            span #{listing.bathrooms} bathrooms
+          if listing.avg_rating
+            .listing-meta-item
+              i.fas.fa-star
+              span #{listing.avg_rating ? parseFloat(listing.avg_rating).toFixed(1) : 'N/A'} (#{listing.review_count || 0} reviews)
+        
+        //- Host Info
+        .dashboard-card(style="margin-bottom: 2rem;")
+          .dashboard-card-body
+            .flex.items-center.gap-4
+              .review-avatar
+                | #{listing.host_name ? listing.host_name.charAt(0).toUpperCase() : 'H'}
+              div
+                h4(style="font-weight: 600; color: var(--gray-900);") Hosted by #{listing.host_name}
+                p(style="font-size: 0.875rem; color: var(--gray-500);") Host since #{new Date(listing.host_since).toLocaleDateString('en-MY', {year: 'numeric', month: 'long'})}
+        
+        //- Description
+        .dashboard-card(style="margin-bottom: 2rem;")
+          .dashboard-card-header
+            h3.dashboard-card-title About this place
+          .dashboard-card-body
+            p(style="line-height: 1.8; color: var(--gray-700);")= listing.description || 'No description available.'
+        
+        //- Amenities
+        if listing.amenities && listing.amenities.length > 0
+          .dashboard-card(style="margin-bottom: 2rem;")
+            .dashboard-card-header
+              h3.dashboard-card-title What this place offers
+            .dashboard-card-body
+              .amenities-grid
+                each amenity in listing.amenities
+                  .amenity-item
+                    i.fas(class=`fa-${amenity.icon || 'check'}`)
+                    span= amenity.name
+        
+        //- Reviews Section
+        .reviews-section
+          .reviews-header
+            .reviews-rating
+              i.fas.fa-star
+              span= listing.avg_rating ? parseFloat(listing.avg_rating).toFixed(1) : 'No ratings'
+              span(style="font-weight: 400; color: var(--gray-500); margin-left: 0.5rem;") · #{listing.review_count || 0} reviews
+          
+          if reviews && reviews.length > 0
+            each review in reviews
+              .review-card
+                .review-header
+                  .review-avatar= review.customer_name ? review.customer_name.charAt(0).toUpperCase() : 'U'
+                  div
+                    .review-author= review.customer_name
+                    .review-date= new Date(review.created_at).toLocaleDateString('en-MY', {year: 'numeric', month: 'long'})
+                .review-rating
+                  - for (let i = 0; i < 5; i++)
+                    if i < review.rating
+                      i.fas.fa-star
+                    else
+                      i.far.fa-star
+                .review-content= review.comment
+          else
+            .empty-state(style="padding: 2rem;")
+              p(style="color: var(--gray-500);") No reviews yet. Be the first to review!
+      
+      //- Booking Card
+      .booking-card
+        .booking-price
+          span.booking-price-value RM #{listing.price}
+          span.booking-price-unit  / night
+        
+        form(action=`/customer/book/${listing.id}` method="POST")
+          .booking-form-group
+            .booking-input-wrapper
+              label.booking-input-label Check-in
+              input.booking-input#checkIn(type="date" name="check_in" required onchange="updateWeatherButton()")
+            .booking-input-wrapper
+              label.booking-input-label Check-out
+              input.booking-input#checkOut(type="date" name="check_out" required)
+            .booking-input-wrapper.full-width
+              label.booking-input-label Guests
+              select.booking-input(name="guests")
+                - for (let i = 1; i <= listing.max_guests; i++)
+                  option(value=i) #{i} guest#{i > 1 ? 's' : ''}
+          
+          button.booking-weather-btn(type="button" onclick=`showWeatherPopup('${listing.city}')`)
+            i.fas.fa-cloud-sun
+            span Check Weather
+          
+          if user && user.id !== listing.host_id
+            button.booking-submit(type="submit")
+              i.fas.fa-calendar-check
+              span Reserve
+          else if !user
+            a.booking-submit(href="/login" style="display: flex; text-align: center;")
+              span Log in to book
+          else
+            button.booking-submit(type="button" disabled style="opacity: 0.5; cursor: not-allowed;")
+              span You own this listing
+        
+        //- Price Breakdown
+        .mt-4#priceBreakdown
+          .flex.justify-between.mb-4(style="font-size: 0.875rem;")
+            span#nightsLabel RM #{listing.price} x 1 night
+            span#nightsTotal RM #{listing.price}
+          .flex.justify-between.mb-4(style="font-size: 0.875rem;")
+            span Service fee (10%)
+            span#serviceFee RM #{(listing.price * 0.1).toFixed(2)}
+          .flex.justify-between(style="font-weight: 700; padding-top: 1rem; border-top: 1px solid var(--gray-200);")
+            span Total
+            span#totalPrice RM #{(listing.price * 1.1).toFixed(2)}
+        
+        //- Favorite Button
+        if user && user.id !== listing.host_id
+          button.btn.btn-secondary(type="button" style="width: 100%; margin-top: 1rem;" onclick=`toggleFavorite(this, ${listing.id})` class=isFavorite ? 'active' : '')
+            if isFavorite
+              i.fas.fa-heart(style="color: var(--primary);")
+              span Remove from Favorites
+            else
+              i.far.fa-heart
+              span Save to Favorites
+          
+          //- Report Button
+          button.btn.btn-outline(type="button" style="width: 100%; margin-top: 0.5rem; color: var(--gray-500); border-color: var(--gray-300);" onclick="showReportModal()")
+            i.fas.fa-flag
+            span Report this listing
+
+  //- Report Modal
+  .modal#reportModal(style="display: none;")
+    .modal-backdrop(onclick="hideReportModal()")
+    .modal-content(style="max-width: 500px;" onclick="event.stopPropagation()")
+      .modal-header
+        h2.modal-title Report Listing
+        button.modal-close(type="button" onclick="hideReportModal()") &times;
+      form(action=`/customer/report/listing/${listing.id}` method="POST")
+        .modal-body
+          .form-group
+            label.form-label Reason for reporting
+            select.form-input(name="reason" required)
+              option(value="") Select a reason
+              option(value="inappropriate") Inappropriate content
+              option(value="misleading") Misleading information
+              option(value="scam") Suspected scam
+              option(value="duplicate") Duplicate listing
+              option(value="other") Other
+          .form-group
+            label.form-label Additional details (optional)
+            textarea.form-input(name="description" rows="3" placeholder="Please provide more details about your concern...")
+        .modal-footer
+          button.btn.btn-secondary(type="button" onclick="hideReportModal()") Cancel
+          button.btn.btn-primary(type="submit")
+            i.fas.fa-flag
+            span Submit Report
+
+block scripts
+  script.
+    const pricePerNight = #{listing.price};
+    
+    // Calculate nights and update price
+    function calculatePrice() {
+      const checkIn = document.getElementById('checkIn').value;
+      const checkOut = document.getElementById('checkOut').value;
+      
+      if (checkIn && checkOut) {
+        const startDate = new Date(checkIn);
+        const endDate = new Date(checkOut);
+        const diffTime = endDate - startDate;
+        const nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (nights > 0) {
+          const subtotal = pricePerNight * nights;
+          const serviceFee = subtotal * 0.1;
+          const total = subtotal + serviceFee;
+          
+          document.getElementById('nightsLabel').textContent = `RM ${pricePerNight} x ${nights} night${nights > 1 ? 's' : ''}`;
+          document.getElementById('nightsTotal').textContent = `RM ${subtotal.toFixed(2)}`;
+          document.getElementById('serviceFee').textContent = `RM ${serviceFee.toFixed(2)}`;
+          document.getElementById('totalPrice').textContent = `RM ${total.toFixed(2)}`;
+        }
+      }
+    }
+    
+    // Weather popup functionality for this listing
+    function updateWeatherButton() {
+      const checkIn = document.getElementById('checkIn').value;
+      if (checkIn) {
+        const btn = document.querySelector('.booking-weather-btn');
+        btn.setAttribute('data-date', checkIn);
+      }
+    }
+    
+    // Attach event listeners
+    document.getElementById('checkIn').addEventListener('change', function() {
+      calculatePrice();
+      updateWeatherButton();
+    });
+    document.getElementById('checkOut').addEventListener('change', calculatePrice);
+    
+    // Report modal functions
+    function showReportModal() {
+      document.getElementById('reportModal').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function hideReportModal() {
+      document.getElementById('reportModal').style.display = 'none';
+      document.body.style.overflow = '';
+    }

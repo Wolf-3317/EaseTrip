@@ -1,0 +1,118 @@
+extends ../layouts/main
+
+block content
+  .container
+    .dashboard
+      aside.dashboard-sidebar
+        nav
+          a.sidebar-nav-item(href="/customer/dashboard")
+            i.fas.fa-th-large
+            span Dashboard
+          a.sidebar-nav-item(href="/customer/trips")
+            i.fas.fa-suitcase
+            span My Trips
+          a.sidebar-nav-item(href="/customer/bookings")
+            i.fas.fa-calendar-check
+            span Bookings
+          a.sidebar-nav-item(href="/customer/favorites")
+            i.fas.fa-heart
+            span Favorites
+          a.sidebar-nav-item(href="/customer/inbox")
+            i.fas.fa-envelope
+            span Inbox
+      
+      main.dashboard-main
+        .dashboard-header
+          h1.dashboard-title Write a Review
+          p.dashboard-subtitle Share your experience at #{booking.listing_title}
+        
+        .dashboard-card
+          .dashboard-card-body
+            //- Booking Summary
+            .flex.items-center.gap-4.mb-6(style="padding: 1rem; background: var(--gray-50); border-radius: var(--radius-lg);")
+              img(src=booking.listing_image || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=200' alt=booking.listing_title style="width: 100px; height: 75px; object-fit: cover; border-radius: var(--radius-md);")
+              div
+                h4(style="font-weight: 700; color: var(--gray-900);")= booking.listing_title
+                p(style="font-size: 0.875rem; color: var(--gray-500);")
+                  i.fas.fa-map-marker-alt(style="margin-right: 0.25rem;")
+                  = booking.listing_city
+                p(style="font-size: 0.875rem; color: var(--gray-500);")
+                  i.fas.fa-calendar(style="margin-right: 0.25rem;")
+                  | #{new Date(booking.check_in).toLocaleDateString('en-MY')} - #{new Date(booking.check_out).toLocaleDateString('en-MY')}
+            
+            form(action=`/customer/review/${booking.id}` method="POST")
+              //- Overall Rating
+              .form-group
+                label.form-label Overall Rating *
+                .rating-input#overallRating
+                  each star in [1, 2, 3, 4, 5]
+                    i.far.fa-star(data-rating=star onclick=`setRating('rating', ${star})` style="font-size: 2rem; cursor: pointer; color: var(--accent-gold); margin-right: 0.5rem;")
+                input(type="hidden" name="rating" id="ratingInput" required)
+              
+              //- Comment
+              .form-group
+                label.form-label Your Review *
+                textarea.form-input(name="comment" rows="5" placeholder="Tell others about your experience. What did you love about this place? Was there anything that could be improved?" required)
+              
+              //- Detailed Ratings
+              h4(style="font-weight: 600; margin: 2rem 0 1rem;") Rate specific aspects
+              
+              .hero-search-form(style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;")
+                .form-group(style="margin-bottom: 0;")
+                  label.form-label Cleanliness
+                  select.form-input(name="cleanliness")
+                    option(value="5") ⭐⭐⭐⭐⭐ Excellent
+                    option(value="4") ⭐⭐⭐⭐ Very Good
+                    option(value="3") ⭐⭐⭐ Average
+                    option(value="2") ⭐⭐ Below Average
+                    option(value="1") ⭐ Poor
+                
+                .form-group(style="margin-bottom: 0;")
+                  label.form-label Communication
+                  select.form-input(name="communication")
+                    option(value="5") ⭐⭐⭐⭐⭐ Excellent
+                    option(value="4") ⭐⭐⭐⭐ Very Good
+                    option(value="3") ⭐⭐⭐ Average
+                    option(value="2") ⭐⭐ Below Average
+                    option(value="1") ⭐ Poor
+                
+                .form-group(style="margin-bottom: 0;")
+                  label.form-label Location
+                  select.form-input(name="location")
+                    option(value="5") ⭐⭐⭐⭐⭐ Excellent
+                    option(value="4") ⭐⭐⭐⭐ Very Good
+                    option(value="3") ⭐⭐⭐ Average
+                    option(value="2") ⭐⭐ Below Average
+                    option(value="1") ⭐ Poor
+                
+                .form-group(style="margin-bottom: 0;")
+                  label.form-label Value for Money
+                  select.form-input(name="value")
+                    option(value="5") ⭐⭐⭐⭐⭐ Excellent
+                    option(value="4") ⭐⭐⭐⭐ Very Good
+                    option(value="3") ⭐⭐⭐ Average
+                    option(value="2") ⭐⭐ Below Average
+                    option(value="1") ⭐ Poor
+              
+              .flex.gap-4.mt-6
+                button.btn.btn-primary.btn-lg(type="submit")
+                  i.fas.fa-paper-plane
+                  span Submit Review
+                a.btn.btn-secondary.btn-lg(href="/customer/bookings") Cancel
+
+block scripts
+  script.
+    function setRating(inputName, rating) {
+      document.getElementById(inputName + 'Input').value = rating;
+      const container = document.getElementById('overallRating');
+      const stars = container.querySelectorAll('i');
+      stars.forEach((star, index) => {
+        if (index < rating) {
+          star.classList.remove('far');
+          star.classList.add('fas');
+        } else {
+          star.classList.remove('fas');
+          star.classList.add('far');
+        }
+      });
+    }

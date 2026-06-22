@@ -1,0 +1,128 @@
+extends ../layouts/main
+
+block content
+  .container
+    .dashboard
+      aside.dashboard-sidebar
+        nav
+          a.sidebar-nav-item(href="/host/dashboard")
+            i.fas.fa-tachometer-alt
+            span Dashboard
+          a.sidebar-nav-item.active(href="/host/listings")
+            i.fas.fa-home
+            span My Listings
+          a.sidebar-nav-item(href="/host/bookings")
+            i.fas.fa-calendar-check
+            span Bookings
+          a.sidebar-nav-item(href="/host/reviews")
+            i.fas.fa-star
+            span Reviews
+          a.sidebar-nav-item(href="/host/inbox")
+            i.fas.fa-envelope
+            span Inbox
+          a.sidebar-nav-item(href="/profile")
+            i.fas.fa-user-circle
+            span Profile
+      
+      main.dashboard-main
+        .dashboard-header
+          h1.dashboard-title Create New Listing
+          p.dashboard-subtitle Add a new property or experience
+        
+        .dashboard-card
+          .dashboard-card-body
+            form(action="/host/listings/create" method="POST" enctype="multipart/form-data")
+              //- Basic Info
+              h3(style="font-weight: 600; margin-bottom: 1rem;") Basic Information
+              
+              .form-group
+                label.form-label(for="title") Title *
+                input.form-input#title(type="text" name="title" placeholder="Beautiful Beach Villa in Langkawi" required)
+              
+              .form-group
+                label.form-label(for="description") Description
+                textarea.form-input#description(name="description" rows="4" placeholder="Describe your property...")
+              
+              .form-group
+                label.form-label Type *
+                select.form-input(name="type" required)
+                  option(value="accommodation") Accommodation
+                  option(value="activity") Activity
+                  option(value="event") Event
+              
+              .form-group
+                label.form-label Category
+                select.form-input(name="category")
+                  option(value="") Select category
+                  option(value="beach") Beach
+                  option(value="city") City
+                  option(value="nature") Nature
+                  option(value="luxury") Luxury
+                  option(value="budget") Budget
+              
+              .form-group
+                label.form-label(for="price") Price per Night (RM) *
+                input.form-input#price(type="number" name="price" min="1" step="0.01" placeholder="150" required)
+              
+              //- Location
+              h3(style="font-weight: 600; margin: 2rem 0 1rem;") Location
+              
+              .form-group
+                label.form-label(for="address") Address
+                input.form-input#address(type="text" name="address" placeholder="123 Jalan Pantai")
+              
+              .form-group
+                label.form-label(for="city") City *
+                input.form-input#city(type="text" name="city" placeholder="Langkawi" list="cities" required)
+                datalist#cities
+                  option(value="Kuala Lumpur")
+                  option(value="Penang")
+                  option(value="Langkawi")
+                  option(value="Melaka")
+                  option(value="Johor Bahru")
+                  option(value="Kota Kinabalu")
+                  option(value="Kuching")
+                  option(value="Cameron Highlands")
+                  option(value="Genting Highlands")
+              
+              .form-group
+                label.form-label(for="state") State
+                input.form-input#state(type="text" name="state" placeholder="Kedah")
+              
+              //- Property Details
+              h3(style="font-weight: 600; margin: 2rem 0 1rem;") Property Details
+              
+              .hero-search-form(style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;")
+                .form-group(style="margin-bottom: 0;")
+                  label.form-label Max Guests
+                  input.form-input(type="number" name="max_guests" min="1" value="2")
+                .form-group(style="margin-bottom: 0;")
+                  label.form-label Bedrooms
+                  input.form-input(type="number" name="bedrooms" min="0" value="1")
+                .form-group(style="margin-bottom: 0;")
+                  label.form-label Bathrooms
+                  input.form-input(type="number" name="bathrooms" min="0" value="1")
+              
+              //- Amenities
+              h3(style="font-weight: 600; margin: 2rem 0 1rem;") Amenities
+              
+              .amenities-grid(style="margin-bottom: 2rem;")
+                each amenity in amenities
+                  label.form-checkbox
+                    input(type="checkbox" name="amenities" value=amenity.id)
+                    span= amenity.name
+              
+              //- Images
+              h3(style="font-weight: 600; margin: 2rem 0 1rem;") Photos
+              
+              .form-group
+                label.form-label Upload Images (max 10)
+                input.form-input(type="file" name="images" multiple accept="image/*")
+                small(style="color: var(--gray-500); display: block; margin-top: 0.5rem;") First image will be the cover photo
+              
+              //- Submit
+              .flex.gap-4.mt-6
+                button.btn.btn-primary.btn-lg(type="submit")
+                  i.fas.fa-plus
+                  span Create Listing
+                a.btn.btn-secondary.btn-lg(href="/host/listings") Cancel

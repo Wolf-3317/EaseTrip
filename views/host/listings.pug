@@ -1,0 +1,83 @@
+extends ../layouts/main
+
+block content
+  .container
+    .dashboard
+      aside.dashboard-sidebar
+        nav
+          a.sidebar-nav-item(href="/host/dashboard")
+            i.fas.fa-tachometer-alt
+            span Dashboard
+          a.sidebar-nav-item.active(href="/host/listings")
+            i.fas.fa-home
+            span My Listings
+          a.sidebar-nav-item(href="/host/bookings")
+            i.fas.fa-calendar-check
+            span Bookings
+          a.sidebar-nav-item(href="/host/reviews")
+            i.fas.fa-star
+            span Reviews
+          a.sidebar-nav-item(href="/host/inbox")
+            i.fas.fa-envelope
+            span Inbox
+          a.sidebar-nav-item(href="/profile")
+            i.fas.fa-user-circle
+            span Profile
+      
+      main.dashboard-main
+        .dashboard-header
+          .flex.justify-between.items-center
+            div
+              h1.dashboard-title My Listings
+              p.dashboard-subtitle Manage your properties and experiences
+            a.btn.btn-primary(href="/host/listings/create")
+              i.fas.fa-plus
+              span Create Listing
+        
+        //- Filter Tabs
+        .flex.gap-2.mb-6
+          a.btn(href="/host/listings" class=!filter ? 'btn-primary' : 'btn-secondary') All
+          a.btn(href="/host/listings?status=active" class=filter === 'active' ? 'btn-primary' : 'btn-secondary') Active
+          a.btn(href="/host/listings?status=pending" class=filter === 'pending' ? 'btn-primary' : 'btn-secondary') Pending
+          a.btn(href="/host/listings?status=delisted" class=filter === 'delisted' ? 'btn-primary' : 'btn-secondary') Delisted
+        
+        if listings && listings.length > 0
+          .listings-grid
+            each listing in listings
+              .card.listing-card
+                .listing-card-image
+                  img(src=listing.primary_image || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400' alt=listing.title)
+                  span.listing-card-badge(class=listing.status !== 'active' ? 'badge-warning' : '')= listing.status
+                .listing-card-content
+                  h3.listing-card-title= listing.title
+                  .listing-card-rating
+                    i.fas.fa-star
+                    span= listing.avg_rating ? parseFloat(listing.avg_rating).toFixed(1) : 'No ratings'
+                    span.reviews · #{listing.booking_count || 0} bookings
+                  .listing-card-footer
+                    .listing-card-price
+                      | RM #{listing.price}
+                      span  / Night
+                  .flex.gap-2.mt-4
+                    a.btn.btn-sm.btn-secondary(href=`/host/listings/${listing.id}/edit`)
+                      i.fas.fa-edit
+                      span Edit
+                    a.btn.btn-sm.btn-secondary(href=`/listings/${listing.id}` target="_blank")
+                      i.fas.fa-eye
+                      span View
+                    form(action=`/host/listings/${listing.id}/delete` method="POST" style="display: inline;")
+                      if listing.status === 'active'
+                        input(type="hidden" name="action" value="delist")
+                        button.btn.btn-sm.btn-outline(type="submit" style="color: var(--warning); border-color: var(--warning);") Delist
+                      else if listing.status === 'delisted'
+                        input(type="hidden" name="action" value="activate")
+                        button.btn.btn-sm.btn-outline(type="submit" style="color: var(--success); border-color: var(--success);") Activate
+        else
+          .dashboard-card
+            .dashboard-card-body
+              .empty-state
+                .empty-state-icon
+                  i.fas.fa-home
+                h3.empty-state-title No listings yet
+                p.empty-state-text Start hosting by creating your first listing!
+                a.btn.btn-primary(href="/host/listings/create") Create Listing

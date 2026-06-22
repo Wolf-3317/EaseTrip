@@ -1,0 +1,108 @@
+extends ../layouts/main
+
+block content
+  .container
+    .dashboard
+      //- Sidebar
+      aside.dashboard-sidebar
+        nav
+          a.sidebar-nav-item.active(href="/customer/dashboard")
+            i.fas.fa-th-large
+            span Dashboard
+          a.sidebar-nav-item(href="/customer/trips")
+            i.fas.fa-suitcase
+            span My Trips
+          a.sidebar-nav-item(href="/customer/bookings")
+            i.fas.fa-calendar-check
+            span Bookings
+          a.sidebar-nav-item(href="/customer/favorites")
+            i.fas.fa-heart
+            span Favorites
+          a.sidebar-nav-item(href="/customer/reviews")
+            i.fas.fa-star
+            span My Reviews
+          a.sidebar-nav-item(href="/customer/inbox")
+            i.fas.fa-envelope
+            span Inbox
+            if unreadMessages > 0
+              span.badge.badge-error(style="margin-left: auto;")= unreadMessages
+          a.sidebar-nav-item(href="/profile")
+            i.fas.fa-user-circle
+            span Profile
+      
+      //- Main Content
+      main.dashboard-main
+        .dashboard-header
+          h1.dashboard-title Welcome back, #{user.name}!
+          p.dashboard-subtitle Here's what's happening with your trips
+        
+        //- Stats
+        .stats-grid
+          .stat-card
+            .stat-card-header
+              .stat-icon
+                i.fas.fa-suitcase
+            .stat-value= upcomingTrips.length
+            .stat-label Upcoming Trips
+          
+          .stat-card
+            .stat-card-header
+              .stat-icon.secondary
+                i.fas.fa-heart
+            .stat-value= favorites.length
+            .stat-label Saved Places
+          
+          .stat-card
+            .stat-card-header
+              .stat-icon.purple
+                i.fas.fa-envelope
+            .stat-value= unreadMessages
+            .stat-label Unread Messages
+        
+        //- Upcoming Trips
+        .dashboard-card
+          .dashboard-card-header
+            h3.dashboard-card-title Upcoming Trips
+            a.btn.btn-sm.btn-secondary(href="/customer/trips") View All
+          .dashboard-card-body
+            if upcomingTrips && upcomingTrips.length > 0
+              each trip in upcomingTrips
+                .flex.items-center.gap-4.mb-4(style="padding: 1rem; background: var(--gray-50); border-radius: var(--radius-lg);")
+                  img(src=trip.listing_image || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=100' alt=trip.listing_title style="width: 80px; height: 60px; object-fit: cover; border-radius: var(--radius-md);")
+                  div(style="flex: 1;")
+                    h4(style="font-weight: 600; color: var(--gray-900);")= trip.listing_title
+                    p(style="font-size: 0.875rem; color: var(--gray-500);")
+                      i.fas.fa-map-marker-alt(style="margin-right: 0.25rem;")
+                      = trip.listing_city
+                  div(style="text-align: right;")
+                    p(style="font-weight: 600; color: var(--gray-900);")= new Date(trip.check_in).toLocaleDateString('en-MY')
+                    p(style="font-size: 0.875rem; color: var(--gray-500);") to #{new Date(trip.check_out).toLocaleDateString('en-MY')}
+                  span.badge(class=trip.status === 'confirmed' ? 'badge-success' : 'badge-warning')= trip.status
+            else
+              .empty-state(style="padding: 2rem;")
+                .empty-state-icon
+                  i.fas.fa-suitcase
+                h3.empty-state-title No upcoming trips
+                p.empty-state-text Time to plan your next adventure!
+                a.btn.btn-primary(href="/listings") Browse Listings
+        
+        //- Saved Places
+        .dashboard-card
+          .dashboard-card-header
+            h3.dashboard-card-title Saved Places
+            a.btn.btn-sm.btn-secondary(href="/customer/favorites") View All
+          .dashboard-card-body
+            if favorites && favorites.length > 0
+              .listings-grid(style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));")
+                each fav in favorites
+                  a.card.listing-card(href=`/listings/${fav.listing_id}`)
+                    .listing-card-image(style="aspect-ratio: 16/10;")
+                      img(src=fav.primary_image || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=300' alt=fav.title)
+                    .listing-card-content(style="padding: 0.75rem;")
+                      h3.listing-card-title(style="font-size: 0.875rem;")= fav.title
+                      .listing-card-price(style="font-size: 0.875rem;")
+                        | RM #{fav.price}
+                        span  / Night
+            else
+              .empty-state(style="padding: 2rem;")
+                p(style="color: var(--gray-500);") No saved places yet

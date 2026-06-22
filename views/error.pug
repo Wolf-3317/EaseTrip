@@ -1,0 +1,13 @@
+extends layouts/main
+
+block content
+  .auth-page
+    .auth-container
+      .auth-card(style="text-align: center;")
+        .empty-state-icon(style="width: 100px; height: 100px; margin: 0 auto 1.5rem;")
+          i.fas.fa-exclamation-triangle(style="font-size: 3rem;")
+        h1(style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;")= title || 'Error'
+        p(style="color: var(--gray-500); margin-bottom: 2rem;")= message || 'Something went wrong. Please try again.'
+        a.btn.btn-primary(href="/")
+          i.fas.fa-home
+          span Back to Home

@@ -1,0 +1,173 @@
+extends layouts/main
+
+block content
+  //- Hero Section
+  section.hero
+    .container
+      .hero-content
+        h1.hero-title Discover Your Perfect Stay in Malaysia
+        p.hero-subtitle From vibrant city apartments to serene beachfront villas, find unique accommodations that make your trip unforgettable.
+        
+        //- Search Form
+        .hero-search
+          form.hero-search-form(action="/listings" method="GET")
+            .hero-search-group
+              label.hero-search-label Where
+              input.hero-search-input(type="text" name="city" placeholder="Search destinations..." list="cities")
+              datalist#cities
+                option(value="Kuala Lumpur")
+                option(value="Penang")
+                option(value="Langkawi")
+                option(value="Melaka")
+                option(value="Johor Bahru")
+                option(value="Kota Kinabalu")
+                option(value="Kuching")
+                option(value="Cameron Highlands")
+            
+            .hero-search-group
+              label.hero-search-label Check In
+              input.hero-search-input(type="date" name="check_in")
+            
+            .hero-search-group
+              label.hero-search-label Check Out
+              input.hero-search-input(type="date" name="check_out")
+            
+            .hero-search-group
+              label.hero-search-label Guests
+              select.hero-search-input(name="guests")
+                option(value="1") 1 Guest
+                option(value="2") 2 Guests
+                option(value="3") 3 Guests
+                option(value="4") 4 Guests
+                option(value="5+") 5+ Guests
+            
+            .hero-search-group
+              button.hero-search-btn(type="submit")
+                i.fas.fa-search
+                span Search
+
+  //- Featured Listings Section
+  section.section
+    .container
+      .section-header
+        div
+          h2.section-title Featured Stays
+          p.section-subtitle Handpicked accommodations for an amazing experience
+        a.btn.btn-secondary(href="/listings") View All
+      
+      if featuredListings && featuredListings.length > 0
+        .listings-grid
+          each listing in featuredListings
+            a.card.listing-card(href=`/listings/${listing.id}`)
+              .listing-card-image
+                if listing.primary_image
+                  img(src=listing.primary_image alt=listing.title)
+                else
+                  img(src="/images/placeholder.jpg" alt=listing.title)
+                button.listing-card-favorite(type="button" onclick="event.preventDefault(); toggleFavorite(this, " + listing.id + ")")
+                  i.far.fa-heart
+                if listing.is_featured
+                  span.listing-card-badge Featured
+              .listing-card-content
+                .listing-card-location
+                  i.fas.fa-map-marker-alt
+                  span= listing.city
+                h3.listing-card-title= listing.title
+                .listing-card-rating
+                  i.fas.fa-star
+                  span= listing.avg_rating ? parseFloat(listing.avg_rating).toFixed(1) : 'New'
+                  span.reviews (#{listing.review_count || 0} reviews)
+                .listing-card-footer
+                  .listing-card-price
+                    | RM #{listing.price}
+                    span  / Night
+                  .listing-card-type= listing.type
+      else
+        .empty-state
+          .empty-state-icon
+            i.fas.fa-home
+          h3.empty-state-title No listings yet
+          p.empty-state-text Be the first to explore amazing stays in Malaysia!
+          a.btn.btn-primary(href="/listings") Browse All Listings
+
+  //- Popular Destinations Section
+  section.section(style="background: var(--gray-100);")
+    .container
+      .section-header
+        div
+          h2.section-title Popular Destinations
+          p.section-subtitle Explore the best of Malaysia
+      
+      .cities-grid
+        - const defaultCities = [{city: 'Kuala Lumpur', listing_count: 0, image: '/images/kl.jpg'}, {city: 'Penang', listing_count: 0, image: '/images/penang.jpg'}, {city: 'Langkawi', listing_count: 0, image: '/images/langkawi.jpg'}, {city: 'Melaka', listing_count: 0, image: '/images/malacca.jpg'}, {city: 'Kota Kinabalu', listing_count: 0, image: '/images/kk.jpg'}, {city: 'Cameron Highlands', listing_count: 0, image: '/images/cameron.jpg'}]
+        - const cities = (popularCities && popularCities.length > 0) ? popularCities : defaultCities
+        each city in cities
+          a.city-card(href=`/listings?city=${encodeURIComponent(city.city)}`)
+            img(src=city.image || '/images/placeholder.jpg' alt=city.city)
+            .city-card-overlay
+              .city-card-content
+                h3.city-card-name= city.city
+                p.city-card-count #{city.listing_count || 0} listings
+
+  //- Categories Section
+  section.section
+    .container
+      .section-header
+        div
+          h2.section-title Browse by Category
+          p.section-subtitle Find the perfect type of stay for your trip
+      
+      .cities-grid
+        a.city-card(href="/listings?category=beach")
+          img(src="/images/beach.jpg" alt="Beach")
+          .city-card-overlay
+            .city-card-content
+              h3.city-card-name Beach Getaways
+              p.city-card-count Oceanfront stays
+        
+        a.city-card(href="/listings?category=city")
+          img(src="/images/city.jpg" alt="City")
+          .city-card-overlay
+            .city-card-content
+              h3.city-card-name City Living
+              p.city-card-count Urban apartments
+        
+        a.city-card(href="/listings?category=nature")
+          img(src="/images/nature.jpg" alt="Nature")
+          .city-card-overlay
+            .city-card-content
+              h3.city-card-name Nature Escapes
+              p.city-card-count Countryside retreats
+        
+        a.city-card(href="/listings?category=luxury")
+          img(src="/images/luxury.jpg" alt="Luxury")
+          .city-card-overlay
+            .city-card-content
+              h3.city-card-name Luxury Stays
+              p.city-card-count Premium experiences
+        
+        a.city-card(href="/listings?type=activity")
+          img(src="/images/activity.jpg" alt="Activities")
+          .city-card-overlay
+            .city-card-content
+              h3.city-card-name Activities
+              p.city-card-count Local experiences
+        
+        a.city-card(href="/listings?type=event")
+          img(src="/images/event.jpg" alt="Events")
+          .city-card-overlay
+            .city-card-content
+              h3.city-card-name Events
+              p.city-card-count Special occasions
+
+  //- CTA Section
+  section.section(style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;")
+    .container
+      .text-center
+        h2(style="font-size: 2rem; font-weight: 700; margin-bottom: 1rem;") Ready to become a host?
+        p(style="font-size: 1.125rem; opacity: 0.9; margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;") Share Your Space and Earn Extra Income by Hosting Now!
+        a.btn.btn-lg(href="/register?role=host" style="background: white; color: #667eea; font-family: Arial, sans-serif; padding: 0.5rem 1.5rem; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;")
+          i.fas.fa-home(style="margin-right: 0.5rem;")
+          span Start Hosting
+
+

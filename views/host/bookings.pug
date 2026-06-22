@@ -1,0 +1,96 @@
+extends ../layouts/main
+
+block content
+  .container
+    .dashboard
+      aside.dashboard-sidebar
+        nav
+          a.sidebar-nav-item(href="/host/dashboard")
+            i.fas.fa-tachometer-alt
+            span Dashboard
+          a.sidebar-nav-item(href="/host/listings")
+            i.fas.fa-home
+            span My Listings
+          a.sidebar-nav-item.active(href="/host/bookings")
+            i.fas.fa-calendar-check
+            span Bookings
+          a.sidebar-nav-item(href="/host/reviews")
+            i.fas.fa-star
+            span Reviews
+          a.sidebar-nav-item(href="/host/inbox")
+            i.fas.fa-envelope
+            span Inbox
+          a.sidebar-nav-item(href="/profile")
+            i.fas.fa-user-circle
+            span Profile
+      
+      main.dashboard-main
+        .dashboard-header
+          h1.dashboard-title Bookings
+          p.dashboard-subtitle Manage your property bookings
+        
+        //- Filter Tabs
+        - var currentFilter = (typeof filter !== 'undefined') ? filter : null
+        .flex.gap-2.mb-6
+          a.btn(href="/host/bookings" class=!currentFilter ? 'btn-primary' : 'btn-secondary') All
+          a.btn(href="/host/bookings?status=pending" class=currentFilter === 'pending' ? 'btn-primary' : 'btn-secondary') Pending
+          a.btn(href="/host/bookings?status=confirmed" class=currentFilter === 'confirmed' ? 'btn-primary' : 'btn-secondary') Confirmed
+          a.btn(href="/host/bookings?status=completed" class=currentFilter === 'completed' ? 'btn-primary' : 'btn-secondary') Completed
+        
+        //- Bookings Table
+        .dashboard-card
+          .dashboard-card-body
+            if bookings && bookings.length > 0
+              .table-responsive
+                table.table
+                  thead
+                    tr
+                      th Guest
+                      th Property
+                      th Check In
+                      th Check Out
+                      th Number
+                      th Total
+                      th Status
+                      th Actions
+                  tbody
+                    each booking in bookings
+                      tr
+                        td
+                          .flex.items-center.gap-2
+                            .review-avatar(style="width: 32px; height: 32px; font-size: 0.75rem;")= booking.customer_name ? booking.customer_name.charAt(0).toUpperCase() : 'G'
+                            div
+                              p(style="font-weight: 500;")= booking.customer_name
+                              p(style="font-size: 0.75rem; color: var(--gray-500);")= booking.customer_email || ''
+                        td= booking.listing_title
+                        td= new Date(booking.check_in).toLocaleDateString('en-MY')
+                        td= new Date(booking.check_out).toLocaleDateString('en-MY')
+                        td= booking.guests
+                        td RM #{booking.total_price}
+                        td
+                          span.badge(class=`badge-${booking.status === 'confirmed' ? 'success' : booking.status === 'pending' ? 'warning' : booking.status === 'completed' ? 'info' : 'gray'}`)= booking.status
+                        td
+                          if booking.status === 'pending'
+                            .flex.gap-2
+                              form(action=`/host/bookings/${booking.id}/update` method="POST" style="display: inline;")
+                                input(type="hidden" name="action" value="confirm")
+                                button.btn.btn-sm.btn-primary(type="submit")
+                                  i.fas.fa-check
+                                  span Confirm
+                              form(action=`/host/bookings/${booking.id}/update` method="POST" style="display: inline;")
+                                input(type="hidden" name="action" value="reject")
+                                button.btn.btn-sm.btn-outline(type="submit" style="color: var(--error); border-color: var(--error);")
+                                  i.fas.fa-times
+                                  span Reject
+                          else if booking.status === 'confirmed'
+                            a.btn.btn-sm.btn-info(href=`/host/inbox/booking/${booking.id}`)
+                              i.fas.fa-comment
+                              span Message Guest
+                          else
+                            span.text-muted(style="color: var(--gray-500); font-size: 0.875rem;") -
+            else
+              .empty-state
+                .empty-state-icon
+                  i.fas.fa-calendar-check
+                h3.empty-state-title No bookings yet
+                p.empty-state-text Bookings will appear here when guests book your properties

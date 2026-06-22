@@ -1,0 +1,115 @@
+extends ../layouts/main
+
+block content
+  .container
+    .dashboard
+      //- Sidebar
+      aside.dashboard-sidebar
+        nav
+          if user.role === 'host'
+            a.sidebar-nav-item(href="/host/dashboard")
+              i.fas.fa-tachometer-alt
+              span Dashboard
+            a.sidebar-nav-item(href="/host/listings")
+              i.fas.fa-home
+              span My Listings
+            a.sidebar-nav-item(href="/host/bookings")
+              i.fas.fa-calendar-check
+              span Bookings
+            a.sidebar-nav-item(href="/host/reviews")
+              i.fas.fa-star
+              span Reviews
+            a.sidebar-nav-item(href="/host/inbox")
+              i.fas.fa-envelope
+              span Inbox
+            a.sidebar-nav-item.active(href="/profile")
+              i.fas.fa-user-circle
+              span Profile
+          else if user.role === 'customer'
+            a.sidebar-nav-item(href="/customer/dashboard")
+              i.fas.fa-th-large
+              span Dashboard
+            a.sidebar-nav-item(href="/customer/trips")
+              i.fas.fa-suitcase
+              span My Trips
+            a.sidebar-nav-item(href="/customer/bookings")
+              i.fas.fa-calendar-check
+              span Bookings
+            a.sidebar-nav-item(href="/customer/favorites")
+              i.fas.fa-heart
+              span Favorites
+            a.sidebar-nav-item(href="/customer/reviews")
+              i.fas.fa-star
+              span My Reviews
+            a.sidebar-nav-item(href="/customer/inbox")
+              i.fas.fa-envelope
+              span Inbox
+            a.sidebar-nav-item.active(href="/profile")
+              i.fas.fa-user-circle
+              span Profile
+
+      
+      //- Main Content
+      main.dashboard-main
+        .dashboard-header
+          h1.dashboard-title My Profile
+          p.dashboard-subtitle Manage your personal information
+        
+        .dashboard-card
+          .dashboard-card-header
+            h3.dashboard-card-title Personal Information
+          .dashboard-card-body
+            form(action="/profile" method="POST")
+              .form-group
+                label.form-label(for="name") Full Name
+                input.form-input#name(type="text" name="name" value=profile.name required)
+              
+              .form-group
+                label.form-label(for="email") Email
+                input.form-input#email(type="email" name="email" value=profile.email required)
+
+              
+              .form-group
+                label.form-label(for="phone") Phone Number
+                input.form-input#phone(type="tel" name="phone" value=profile.phone placeholder="Enter your phone number")
+              
+              .form-group
+                label.form-label(for="address") Address
+                input.form-input#address(type="text" name="address" value=profile.address placeholder="Enter your address")
+              
+              .form-group
+                label.form-label(for="bio") Bio
+                textarea.form-input#bio(name="bio" rows="3" placeholder="Tell us about yourself")= profile.bio
+              
+              button.btn.btn-primary(type="submit") Save Changes
+        
+        .dashboard-card
+          .dashboard-card-header
+            h3.dashboard-card-title Change Password
+          .dashboard-card-body
+            form(action="/profile/password" method="POST")
+              .form-group
+                label.form-label(for="currentPassword") Current Password
+                input.form-input#currentPassword(type="password" name="currentPassword" required)
+              
+              .form-group
+                label.form-label(for="newPassword") New Password
+                input.form-input#newPassword(type="password" name="newPassword" required)
+              
+              .form-group
+                label.form-label(for="confirmPassword") Confirm New Password
+                input.form-input#confirmPassword(type="password" name="confirmPassword" required)
+              
+              button.btn.btn-primary(type="submit") Update Password
+        
+        .dashboard-card
+          .dashboard-card-header
+            h3.dashboard-card-title Account Information
+          .dashboard-card-body
+            .flex.gap-4.items-center(style="justify-content: space-between;")
+              div
+                p(style="font-weight: 600; color: var(--gray-900);") Account Type
+                p(style="color: var(--gray-500); text-transform: capitalize;")= profile.role
+              div
+                p(style="font-weight: 600; color: var(--gray-900);") Member Since
+                p(style="color: var(--gray-500);")= new Date(profile.created_at).toLocaleDateString('en-MY', {year: 'numeric', month: 'long', day: 'numeric'})

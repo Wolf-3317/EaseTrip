@@ -1,0 +1,144 @@
+extends ../layouts/main
+
+block content
+  .container
+    .dashboard
+      aside.dashboard-sidebar
+        nav
+          a.sidebar-nav-item(href="/host/dashboard")
+            i.fas.fa-tachometer-alt
+            span Dashboard
+          a.sidebar-nav-item.active(href="/host/listings")
+            i.fas.fa-home
+            span My Listings
+          a.sidebar-nav-item(href="/host/bookings")
+            i.fas.fa-calendar-check
+            span Bookings
+          a.sidebar-nav-item(href="/host/reviews")
+            i.fas.fa-star
+            span Reviews
+          a.sidebar-nav-item(href="/host/inbox")
+            i.fas.fa-envelope
+            span Inbox
+          a.sidebar-nav-item(href="/profile")
+            i.fas.fa-user-circle
+            span Profile
+      
+      main.dashboard-main
+        .dashboard-header
+          .flex.justify-between.items-center
+            div
+              h1.dashboard-title Edit Listing
+              p.dashboard-subtitle Update your property details
+            a.btn.btn-secondary(href="/host/listings")
+              i.fas.fa-arrow-left
+              span Back to Listings
+        
+        .dashboard-card
+          .dashboard-card-body
+            form(action=`/host/listings/${listing.id}/edit` method="POST" enctype="multipart/form-data")
+              //- Basic Info
+              h3(style="font-weight: 600; margin-bottom: 1rem;") Basic Information
+              
+              .form-group
+                label.form-label(for="title") Title *
+                input.form-input#title(type="text" name="title" value=listing.title required)
+              
+              .form-group
+                label.form-label(for="description") Description
+                textarea.form-input#description(name="description" rows="4")= listing.description
+              
+              .form-group
+                label.form-label Type *
+                select.form-input(name="type" required)
+                  option(value="accommodation" selected=listing.type === 'accommodation') Accommodation
+                  option(value="activity" selected=listing.type === 'activity') Activity
+                  option(value="event" selected=listing.type === 'event') Event
+              
+              .form-group
+                label.form-label Category
+                select.form-input(name="category")
+                  option(value="" selected=!listing.category) Select category
+                  option(value="beach" selected=listing.category === 'beach') Beach
+                  option(value="city" selected=listing.category === 'city') City
+                  option(value="nature" selected=listing.category === 'nature') Nature
+                  option(value="luxury" selected=listing.category === 'luxury') Luxury
+                  option(value="budget" selected=listing.category === 'budget') Budget
+              
+              .form-group
+                label.form-label(for="price") Price per Night (RM) *
+                input.form-input#price(type="number" name="price" min="1" step="0.01" value=listing.price required)
+              
+              //- Location
+              h3(style="font-weight: 600; margin: 2rem 0 1rem;") Location
+              
+              .form-group
+                label.form-label(for="address") Address
+                input.form-input#address(type="text" name="address" value=listing.address)
+              
+              .form-group
+                label.form-label(for="city") City *
+                input.form-input#city(type="text" name="city" value=listing.city list="cities" required)
+                datalist#cities
+                  option(value="Kuala Lumpur")
+                  option(value="Penang")
+                  option(value="Langkawi")
+                  option(value="Melaka")
+                  option(value="Johor Bahru")
+                  option(value="Kota Kinabalu")
+                  option(value="Kuching")
+                  option(value="Cameron Highlands")
+                  option(value="Genting Highlands")
+              
+              .form-group
+                label.form-label(for="state") State
+                input.form-input#state(type="text" name="state" value=listing.state)
+              
+              //- Property Details
+              h3(style="font-weight: 600; margin: 2rem 0 1rem;") Property Details
+              
+              .hero-search-form(style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;")
+                .form-group(style="margin-bottom: 0;")
+                  label.form-label Max Guests
+                  input.form-input(type="number" name="max_guests" min="1" value=listing.max_guests)
+                .form-group(style="margin-bottom: 0;")
+                  label.form-label Bedrooms
+                  input.form-input(type="number" name="bedrooms" min="0" value=listing.bedrooms)
+                .form-group(style="margin-bottom: 0;")
+                  label.form-label Bathrooms
+                  input.form-input(type="number" name="bathrooms" min="0" value=listing.bathrooms)
+              
+              //- Amenities
+              h3(style="font-weight: 600; margin: 2rem 0 1rem;") Amenities
+              
+              - var listingAmenityIds = listing.amenities ? listing.amenities.map(a => a.id) : []
+              .amenities-grid(style="margin-bottom: 2rem;")
+                each amenity in amenities
+                  label.form-checkbox
+                    input(type="checkbox" name="amenities" value=amenity.id checked=listingAmenityIds.includes(amenity.id))
+                    span= amenity.name
+              
+              //- Current Images
+              if listing.images && listing.images.length > 0
+                h3(style="font-weight: 600; margin: 2rem 0 1rem;") Current Photos
+                .flex.gap-3.mb-4.flex-wrap
+                  each image in listing.images
+                    .card(style="width: 150px; padding: 0.5rem;")
+                      img(src=image.image_url style="width: 100%; height: 100px; object-fit: cover; border-radius: var(--radius-md);")
+                      if image.is_primary
+                        span.badge.badge-success(style="margin-top: 0.5rem;") Cover
+              
+              //- Upload New Images
+              h3(style="font-weight: 600; margin: 2rem 0 1rem;") Add More Photos
+              
+              .form-group
+                label.form-label Upload Images (max 10)
+                input.form-input(type="file" name="images" multiple accept="image/*")
+                small(style="color: var(--gray-500); display: block; margin-top: 0.5rem;") New images will be added to existing ones
+              
+              //- Submit
+              .flex.gap-4.mt-6
+                button.btn.btn-primary.btn-lg(type="submit")
+                  i.fas.fa-save
+                  span Save Changes
+                a.btn.btn-secondary.btn-lg(href="/host/listings") Cancel
