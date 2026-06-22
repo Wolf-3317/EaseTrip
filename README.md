@@ -23,7 +23,7 @@ The system uses several modules to handle different responsibilities:
 
 ## System Functions
 ### User Authentication
-**bcrypt** is used to hash user passwords before they are stored. A session cookie is issued on login and is checked on every request — if the session is no longer valid, the system determines that the user is logged out.
+**bcrypt** is used to hash user passwords before they are stored. A session cookie is issued on login and is checked on every request if the session is no longer valid, the system determines that the user is logged out.
 
 ### Role-Based Access
 The **auth middleware** determines whether a user is a customer, host, or admin. Each role is granted different permissions, and unauthorized access attempts are redirected with a flash error message.
@@ -32,7 +32,7 @@ The **auth middleware** determines whether a user is a customer, host, or admin.
 The **Booking model** checks the requested check-in and check-out dates against existing reservations. The system tracks overlapping date ranges and helps determine if a listing is available before confirming a booking.
 
 ### Listing Management
-Hosts can create, update, and upload images for their listings through the **upload middleware** (multer), which validates file type and size before saving.
+Hosts can create, update, and upload images for their listings through the **upload middleware** , which validates file type and size before saving.
 
 ### Weather Monitoring
 The system integrates with **data.gov.my**, a Malaysian government open-data API, which:
